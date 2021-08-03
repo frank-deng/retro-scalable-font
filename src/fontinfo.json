@@ -1,0 +1,20 @@
+{
+    "ASCPS":{
+        "type":"ascii"
+    },
+    "HZKPST":{
+        "type":"fuhao"
+    },
+    "HZKPSSTJ":{
+        "type":"hanzi"
+    },
+    "HZKPSHTJ":{
+        "type":"hanzi"
+    },
+    "HZKPSFSJ":{
+        "type":"hanzi"
+    },
+    "HZKPSKTJ":{
+        "type":"hanzi"
+    }
+}
