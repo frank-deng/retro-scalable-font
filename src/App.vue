@@ -4,9 +4,10 @@
 <script setup>
 import axios from 'axios';
 import {provide,reactive} from 'vue';
+import fontInfoData from '/@/fontinfo.json';
 
 import mainPage from '/@/mainPage.vue';
-const fontInfo=reactive({});
+const fontInfo=reactive(fontInfoData);
 provide('fontInfo',fontInfo);
 axios.get('./fonts/HZKPSSTJ',{
   responseType: 'blob'
