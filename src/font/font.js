@@ -1,25 +1,32 @@
+import {
+    Rect,
+    HorLineTo,
+    VerLineTo,
+    MoveTo,
+    LineTo,
+    CurveTo,
+    QuadCurveTo
+} from './pathElements';
 class Font{
     constructor(fontData){
         //这是个抽象类，不能实例化
         if (Font==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
         }
-        this.__fontData=fontData;
-        this.__dataView=new DataView(this.__fontData);
+        this.__arrayBuffer=fontData;
+        this.__dataView=new DataView(this.__arrayBuffer);
     }
-    __getCharMeta(offset){
-        let dataView=this.__dataView;
-        return{
-            offset:(dataView.getUInt32(offset,true)&0xfffffff),
-            length:dataView.getUint16(offset+4,true)
-        };
-    }
-    getGlyph(idx){
-        let {offset,dataLen}=this.__getCharMeta(idx*6);
+    __getGlyphData(idx){
+        let dataView=this.__dataView, offset=idx*6;
+        let dataOffset=dataView.getInt32(offset,true)&0xfffffff;
+        let dataLen=dataView.getUint16(offset+4,true);
         if(!dataLen){
             return null;
         }
-        return new Uint8Array(arrayBuffer,offset,dataLen);
+        return new Uint8Array(this.__arrayBuffer,dataOffset,dataLen);
+    }
+    getGlyph(idx){
+        return this.__getGlyphData(idx);
     }
 }
 export class FontASC extends Font{
@@ -42,5 +49,12 @@ export class FontHZK extends Font{
     BASE_WIDTH=255;
     constructor(fontData){
         super(fontData);
+    }
+    getGlyph(qu,wei,isSymbol=false){
+        //处理英文空格
+        qu=isSymbol ? qu-0xa1 : qu-0xb0;
+        wei=wei-0xa1;
+        offset=qu*94+wei;
+        return super.getGlyph(offset);
     }
 }

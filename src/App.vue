@@ -11,5 +11,6 @@ const fontInfo=reactive({});
 provide('fontInfo',fontInfo);
 initFontManager().then((fontManager)=>{
   console.log(fontManager);
+  console.log(fontManager.getGlyph(','));
 });
 </script>

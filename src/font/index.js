@@ -37,7 +37,7 @@ export class FontManager{
             __hzkFontName:hzkFont
         });
     }
-    __getFontUse(char){
+    getGlyph(char){
         let code=char.charCodeAt(0);
         //控制字符不支持
         if(code<0x20){
@@ -45,10 +45,7 @@ export class FontManager{
         }
         //作为英文字符处理
         if(code<=0x7e){
-            return {
-                idx:code-0x20,
-                font:this.__ascFont
-            };
+            return this.__ascFont.getGlyph(code-0x20,this.__ascFontIdx);
         }
         //作为中文字符处理
         let iconvBuf=iconv(char,'GB2312');
@@ -62,16 +59,11 @@ export class FontManager{
             return null;
         }
         //符号字库使用
-        return{
-            qu,wei,
-            font:(qu<0xa9 ? this.__hzkSymbolFont : this.__hzkFont[this.__hzkFontName])
-        };
-    }
-    getGlyph(char){
-        let font=this.__getFontUse(char);
-        if(!font){
-            return null;
+        if(qu<0xb0){
+            return this.__hzkSymbolFont.getGlyph(qu,wei,true);
         }
+        //汉字字库使用
+        return this.__hzkFont[this.__hzkFontName].getGlyph(qu,wei);
     }
 }
 
