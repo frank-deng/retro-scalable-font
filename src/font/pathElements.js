@@ -27,9 +27,9 @@ export class MoveTo{
     }
 }
 export class LineTo{
-    constructor(x,y,relative=false){
+    constructor(x,y,rx=false,ry=false){
         Object.assign(this,{
-            x,y,relative
+            x,y,rx,ry
         });
     }
 }
