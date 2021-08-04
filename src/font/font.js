@@ -19,7 +19,7 @@ function getNum6Pair(data,offset){
         n1=((data[offset+1]&3)<<4)|data[offset+2];
     let s0=n0&32, s1=n1&32;
     n0&=31; n1&=31;
-    return [s0 ? -n0 : n0, s1 ? n1 : -n1];
+    return [s0 ? -n0 : n0, s1 ? -n1 : n1];
 }
 class Font{
     constructor(fontData){
@@ -74,7 +74,7 @@ class Font{
             4:{
                 step:8,
                 processor(data,offset){
-                    return new CurveTo(
+                    return new QuadCurveTo(
                         getNum8(data,offset),
                         getNum8(data,offset+2),
                         getNum8(data,offset+4),
@@ -85,7 +85,7 @@ class Font{
             5:{
                 step:12,
                 processor(data,offset){
-                    return new QuadCurveTo(
+                    return new CurveTo(
                         getNum8(data,offset),
                         getNum8(data,offset+2),
                         getNum8(data,offset+4),
@@ -136,9 +136,9 @@ class Font{
                 processor(data,offset){
                     let dx0=getNum4(data,offset),
                         dy0=getNum4(data,offset+1),
-                        dx1=dx0+getNum4(data,offset+2),
-                        dy1=dx0+getNum4(data,offset+3);
-                    return new CurveTo(dx0,dy0,dx1,dy1,true);
+                        dx1=getNum4(data,offset+2),
+                        dy1=getNum4(data,offset+3);
+                    return new QuadCurveTo(dx0,dy0,dx0+dx1,dy0+dy1,true);
                 }
             },
             12:{
@@ -146,8 +146,7 @@ class Font{
                 processor(data,offset){
                     let [dx0,dy0]=getNum6Pair(data,offset);
                     let [dx1,dy1]=getNum6Pair(data,offset+3);
-                    dx1+=dx0; dy1+=dy0;
-                    return new CurveTo(dx0,dy0,dx1,dy1,true);
+                    return new QuadCurveTo(dx0,dy0,dx0+dx1,dy0+dy1,true);
                 }
             },
             13:{
@@ -155,11 +154,18 @@ class Font{
                 processor(data,offset){
                     let dx0=getNum4(data,offset),
                         dy0=getNum4(data,offset+1),
-                        dx1=dx0+getNum4(data,offset+2),
-                        dy1=dx0+getNum4(data,offset+3),
-                        dx2=dx1+getNum4(data,offset+4),
-                        dy2=dx1+getNum4(data,offset+5);
-                    return new QuadCurveTo(dx0,dy0,dx1,dy1,dx2,dy2,true);
+                        dx1=getNum4(data,offset+2),
+                        dy1=getNum4(data,offset+3),
+                        dx2=getNum4(data,offset+4),
+                        dy2=getNum4(data,offset+5);
+                    return new CurveTo(
+                        dx0,
+                        dy0,
+                        dx0+dx1,
+                        dy0+dy1,
+                        dx0+dx1+dx2,
+                        dy0+dy1+dy2,
+                        true);
                 }
             },
             14:{
@@ -168,8 +174,14 @@ class Font{
                     let [dx0,dy0]=getNum6Pair(data,offset);
                     let [dx1,dy1]=getNum6Pair(data,offset+3);
                     let [dx2,dy2]=getNum6Pair(data,offset+6);
-                    dx1+=dx0; dy1+=dy0; dx2+=dx1; dy2+=dy1;
-                    return new QuadCurveTo(dx0,dy0,dx1,dy1,dx2,dy2,true);
+                    return new CurveTo(
+                        dx0,
+                        dy0,
+                        dx0+dx1,
+                        dy0+dy1,
+                        dx0+dx1+dx2,
+                        dy0+dy1+dy2,
+                        true);
                 }
             },
             15:{
@@ -206,7 +218,7 @@ class Font{
         }
         for(let action of actions){
             if(action instanceof Rect){
-                result.push(action);
+                result.push([action]);
                 continue;
             }
             let pos=action.next(x,y);
@@ -220,9 +232,28 @@ class Font{
         __closePath();
         return result;
     }
+    __mergeClosedPaths(pathList){
+        let result=[],group=[];
+        function __addGroup(){
+            if(group.length){
+                result.push(group);
+                group=[];
+            }
+        }
+        for(let item of pathList){
+            if(1==item.length){
+                __addGroup();
+                result.push(item);
+                continue;
+            }
+            group=group.concat(item);
+        }
+        __addGroup();
+        return result;
+    }
     getGlyph(idx){
         return {
-            path:this.__getClosedPaths(this.__processGlyphData(this.__getGlyphData(idx)))
+            path:this.__mergeClosedPaths(this.__getClosedPaths(this.__processGlyphData(this.__getGlyphData(idx))))
         }
     }
 }
