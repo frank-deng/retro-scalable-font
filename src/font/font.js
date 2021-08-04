@@ -109,36 +109,26 @@ class Font{
             7:{
                 step:3,
                 processor(data,offset){
-                    return new LineTo(
-                        getNum4(data,offset),
-                        getNum8(data,offset+1),
-                        rx=true);
+                    return new LineTo(getNum4(data,offset),getNum8(data,offset+1),true,false);
                 }
             },
             8:{
                 step:3,
                 processor(data,offset){
-                    return new LineTo(
-                        getNum8(data,offset),
-                        getNum4(data,offset+2),
-                        ry=true);
+                    return new LineTo(getNum8(data,offset),getNum4(data,offset+2),false,true);
                 }
             },
             9:{
                 step:2,
                 processor(data,offset){
-                    return new LineTo(
-                        getNum4(data,offset),
-                        getNum4(data,offset+1),
-                        rx=true,ry=true
-                    );
+                    return new LineTo(getNum4(data,offset),getNum4(data,offset+1),true,true);
                 }
             },
             10:{
                 step:3,
                 processor(data,offset){
                     let [dx,dy]=getNum6Pair(data,offset);
-                    return new LineTo(dx,dy,rx=true,ry=true);
+                    return new LineTo(dx,dy,true,true);
                 }
             },
             11:{
@@ -258,10 +248,6 @@ export class FontHZK extends Font{
         super(fontData);
     }
     getGlyph(qu,wei,isSymbol=false){
-        //处理英文空格
-        qu=isSymbol ? qu-0xa1 : qu-0xb0;
-        wei=wei-0xa1;
-        offset=qu*94+wei;
-        return super.getGlyph(offset);
+        return super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1));
     }
 }

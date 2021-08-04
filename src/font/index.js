@@ -48,7 +48,7 @@ export class FontManager{
             return this.__ascFont.getGlyph(code-0x20,this.__ascFontIdx);
         }
         //作为中文字符处理
-        let iconvBuf=iconv(char,'GB2312');
+        let iconvBuf=iconv.encode(char,'GB2312');
         //当前字符无法表示为GB2312或GBK
         if(2!=iconvBuf.length){
             return null;
