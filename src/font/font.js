@@ -7,6 +7,20 @@ import {
     CurveTo,
     QuadCurveTo
 } from './pathElements';
+function getNum8(data,offset){
+    return (data[offset]<<4)|data[offset+1];
+}
+function getNum4(data,offset){
+    let value=data[offset], num=value&7;
+    return value&8 ? -num : num;
+}
+function getNum6Pair(data,offset){
+    let n0=(data[offset]<<2)|(data[offset+1]>>2),
+        n1=((data[offset+1]&0x3)<<4)|data[offset+2];
+    let s0=n0&32, s1=n1&32;
+    n0&=31; n1&=31;
+    return [s0 ? -n0 : n0, s1 ? n1 : -n1];
+}
 class Font{
     constructor(fontData){
         //这是个抽象类，不能实例化
@@ -32,46 +46,39 @@ class Font{
         return result;
     }
     __processGlyphData(data){
-        let idx=0;counter=10000;
         let ctrlTable={
             0:{
                 step:4,
                 processor(data,offset){
-                    return new MoveTo(
-                        (data[offset]<<4)|data[offset+1],
-                        (data[offset+2]<<4)|data[offset+3]
-                    );
+                    return new MoveTo(getNum8(data,offset), getNum8(data,offset+2));
                 }
             },
             1:{
                 step:2,
                 processor(data,offset){
-                    return new HorLineTo((data[offset]<<4)|data[offset+1]);
+                    return new HorLineTo(getNum8(data,offset));
                 }
             },
             2:{
                 step:2,
                 processor(data,offset){
-                    return new VerLineTo((data[offset]<<4)|data[offset+1]);
+                    return new VerLineTo(getNum8(data,offset));
                 }
             },
             3:{
                 step:4,
                 processor(data,offset){
-                    return new LineTo(
-                        (data[offset]<<4)|data[offset+1],
-                        (data[offset+2]<<4)|data[offset+3]
-                    );
+                    return new LineTo(getNum8(data,offset), getNum8(data,offset+2));
                 }
             },
             4:{
                 step:8,
                 processor(data,offset){
                     return new CurveTo(
-                        (data[offset]<<4)|data[offset+1],
-                        (data[offset+2]<<4)|data[offset+3],
-                        (data[offset+4]<<4)|data[offset+5],
-                        (data[offset+6]<<4)|data[offset+7]
+                        getNum8(data,offset),
+                        getNum8(data,offset+2),
+                        getNum8(data,offset+4),
+                        getNum8(data,offset+6)
                     );
                 }
             },
@@ -79,36 +86,119 @@ class Font{
                 step:12,
                 processor(data,offset){
                     return new QuadCurveTo(
-                        (data[offset]<<4)|data[offset+1],
-                        (data[offset+2]<<4)|data[offset+3],
-                        (data[offset+4]<<4)|data[offset+5],
-                        (data[offset+6]<<4)|data[offset+7],
-                        (data[offset+8]<<4)|data[offset+9],
-                        (data[offset+10]<<4)|data[offset+11]
+                        getNum8(data,offset),
+                        getNum8(data,offset+2),
+                        getNum8(data,offset+4),
+                        getNum8(data,offset+6),
+                        getNum8(data,offset+8),
+                        getNum8(data,offset+10)
                     );
                 }
             },
             6:{
                 step:8,
                 processor(data,offset){
-                    let x0=(data[offset]<<4)|data[offset+1],
-                        y0=(data[offset+2]<<4)|data[offset+3],
-                        x1=(data[offset+4]<<4)|data[offset+5],
-                        y1=(data[offset+6]<<4)|data[offset+7]
-                    return new CurveTo(x0,y0,x1,y1);
+                    return new Rect(
+                        getNum8(data,offset),
+                        getNum8(data,offset+2),
+                        getNum8(data,offset+4),
+                        getNum8(data,offset+6)
+                    );
                 }
+            },
+            7:{
+                step:3,
+                processor(data,offset){
+                    return new LineTo(
+                        getNum4(data,offset),
+                        getNum8(data,offset+1),
+                        rx=true);
+                }
+            },
+            8:{
+                step:3,
+                processor(data,offset){
+                    return new LineTo(
+                        getNum8(data,offset),
+                        getNum4(data,offset+2),
+                        ry=true);
+                }
+            },
+            9:{
+                step:2,
+                processor(data,offset){
+                    return new LineTo(
+                        getNum4(data,offset),
+                        getNum4(data,offset+1),
+                        rx=true,ry=true
+                    );
+                }
+            },
+            10:{
+                step:3,
+                processor(data,offset){
+                    let [dx,dy]=getNum6Pair(data,offset);
+                    return new LineTo(dx,dy,rx=true,ry=true);
+                }
+            },
+            11:{
+                step:4,
+                processor(data,offset){
+                    let dx0=getNum4(data,offset),
+                        dy0=getNum4(data,offset+1),
+                        dx1=dx0+getNum4(data,offset+2),
+                        dy1=dx0+getNum4(data,offset+3);
+                    return new CurveTo(dx0,dy0,dx1,dy1,true);
+                }
+            },
+            12:{
+                step:6,
+                processor(data,offset){
+                    let [dx0,dy0]=getNum6Pair(data,offset);
+                    let [dx1,dy1]=getNum6Pair(data,offset+3);
+                    dx1+=dx0; dy1+=dy0;
+                    return new CurveTo(dx0,dy0,dx1,dy1,true);
+                }
+            },
+            13:{
+                step:6,
+                processor(data,offset){
+                    let dx0=getNum4(data,offset),
+                        dy0=getNum4(data,offset+1),
+                        dx1=dx0+getNum4(data,offset+2),
+                        dy1=dx0+getNum4(data,offset+3),
+                        dx2=dx1+getNum4(data,offset+4),
+                        dy2=dx1+getNum4(data,offset+5);
+                    return new QuadCurveTo(dx0,dy0,dx1,dy1,dx2,dy2,true);
+                }
+            },
+            14:{
+                step:9,
+                processor(data,offset){
+                    let [dx0,dy0]=getNum6Pair(data,offset);
+                    let [dx1,dy1]=getNum6Pair(data,offset+3);
+                    let [dx2,dy2]=getNum6Pair(data,offset+6);
+                    dx1+=dx0; dy1+=dy0; dx2+=dx1; dy2+=dy1;
+                    return new QuadCurveTo(dx0,dy0,dx1,dy1,dx2,dy2,true);
+                }
+            },
+            15:{
+                step:4,
+                processor(data,offset){}
             }
         };
-        let result=[];
+        let idx=0,result=[],counter=10000;
         while(idx<=data.length && counter--){
-            ctrl=ctrlTable[data[idx]];
+            let ctrl=ctrlTable[data[idx]];
             idx++;
             if(idx+ctrl.step>=data.length){
                 break;
             }
             let obj=ctrl.processor(data,idx);
             idx+=ctrl.step;
-            result.push(obj);
+            if(obj){
+                result.push(obj);
+            }
         }
         if(!counter){
             throw new Error('Dead loop detected');
@@ -116,7 +206,7 @@ class Font{
         return result;
     }
     getGlyph(idx){
-        return this.__getGlyphData(idx);
+        return this.__processGlyphData(this.__getGlyphData(idx));
     }
 }
 export class FontASC extends Font{
