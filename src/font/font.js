@@ -16,7 +16,7 @@ function getNum4(data,offset){
 }
 function getNum6Pair(data,offset){
     let n0=(data[offset]<<2)|(data[offset+1]>>2),
-        n1=((data[offset+1]&0x3)<<4)|data[offset+2];
+        n1=((data[offset+1]&3)<<4)|data[offset+2];
     let s0=n0&32, s1=n1&32;
     n0&=31; n1&=31;
     return [s0 ? -n0 : n0, s1 ? n1 : -n1];
@@ -191,7 +191,7 @@ class Font{
         while(idx<=data.length && counter--){
             let ctrl=ctrlTable[data[idx]];
             idx++;
-            if(idx+ctrl.step>=data.length){
+            if(idx>=data.length){
                 break;
             }
             let obj=ctrl.processor(data,idx);
@@ -205,8 +205,35 @@ class Font{
         }
         return result;
     }
+    __getClosedPaths(actions){
+        let result=[], currentPath=[],x=0,y=0;
+        function __closePath(){
+            if(!currentPath.length){
+                return;
+            }
+            result.push(currentPath);
+            currentPath=[];
+        }
+        for(let action of actions){
+            if(action instanceof Rect){
+                result.push(action);
+                continue;
+            }
+            let pos=action.next(x,y);
+            if(action instanceof MoveTo || (pos.x==x && pos.y==y)){
+                __closePath();
+            }
+            currentPath.push(action);
+            x=pos.x;
+            y=pos.y;
+        }
+        __closePath();
+        return result;
+    }
     getGlyph(idx){
-        return this.__processGlyphData(this.__getGlyphData(idx));
+        return {
+            path:this.__getClosedPaths(this.__processGlyphData(this.__getGlyphData(idx)))
+        }
     }
 }
 export class FontASC extends Font{
