@@ -2,7 +2,7 @@
     <div class='mainPage'>
         <input v-model='state.inputText' @input='updateFont'/>
         <p>
-            <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='255' height='255'>
+            <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='175' height='175'>
                 <path fill-rule="evenodd" v-for='item of state.svgPath' :key='item' :d='item'/>
             </svg>
         </p>

@@ -32,7 +32,7 @@ class Font{
     }
     __getGlyphData(idx){
         let dataView=this.__dataView, offset=idx*6;
-        let dataOffset=dataView.getInt32(offset,true)&0xfffffff;
+        let dataOffset=dataView.getUint32(offset,true)&0xfffffff;
         let dataLen=dataView.getUint16(offset+4,true);
         if(!dataLen){
             return null;
@@ -258,7 +258,7 @@ class Font{
     }
 }
 export class FontASC extends Font{
-    BASE_HEIGHT=255;
+    BASE_HEIGHT=128;
     constructor(fontData){
         super(fontData);
     }
@@ -273,8 +273,8 @@ export class FontASC extends Font{
     }
 }
 export class FontHZK extends Font{
-    BASE_HEIGHT=255;
-    BASE_WIDTH=255;
+    BASE_HEIGHT=175;
+    BASE_WIDTH=175;
     constructor(fontData){
         super(fontData);
     }

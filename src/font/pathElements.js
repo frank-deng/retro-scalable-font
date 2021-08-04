@@ -43,7 +43,7 @@ export class HorLineTo{
     }
     next(x,y){
         return {
-            x:x+this.x,
+            x:this.x,
             y
         };
     }
