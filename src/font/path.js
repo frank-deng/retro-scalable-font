@@ -1,6 +1,4 @@
 import { Bezier } from 'bezier-js/dist/bezier.js';
-import Intersection from './intersection';
-import Insection from './intersection';
 
 export class PathElement{
     constructor(){
@@ -350,21 +348,6 @@ export class Path{
         }
         return true;
     }
-    intersect(path){
-        if(!(path instanceof Path)){
-            throw new TypeError('Intersection detection only supported between Path instances.');
-        }
-        let strokeListA=this.__strokeList.filter(item=>(!(item instanceof MoveTo)));
-        let strokeListB=path.__strokeList.filter(item=>(!(item instanceof MoveTo)));
-        for(let a of strokeListA){
-            for(let b of strokeListB){
-                if(Intersection.calculate(a,b)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     toSVG(){
         let x=0, y=0, result=[];
         for(let item of this.__strokeList){
@@ -400,10 +383,14 @@ export class Glyph{
             throw new TypeError('Item must be instance of Path');
         }
         for(let path of this.__pathList){
+            path.merge(item);
+            return;
+            /*
             if(!path.intersect(item)){
                 path.merge(item);
                 return;
             }
+            */
         }
         this.__pathList.push(new Path(item));
     }
