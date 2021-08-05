@@ -22,13 +22,17 @@ function getNum6Pair(data,offset){
     return [s0 ? -n0 : n0, s1 ? -n1 : n1];
 }
 class Font{
-    constructor(fontData){
+    constructor(fontData,fontName=null){
         //这是个抽象类，不能实例化
         if (Font==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
         }
         this.__arrayBuffer=fontData;
         this.__dataView=new DataView(this.__arrayBuffer);
+        this.__fontName=fontName;
+    }
+    getFontName(){
+        return this.__fontName;
     }
     __getGlyphData(idx){
         let dataView=this.__dataView, offset=idx*6;
@@ -258,7 +262,7 @@ class Font{
     }
 }
 export class FontASC extends Font{
-    BASE_HEIGHT=128;
+    BASE_HEIGHT=175;
     constructor(fontData){
         super(fontData);
     }
@@ -275,8 +279,8 @@ export class FontASC extends Font{
 export class FontHZK extends Font{
     BASE_HEIGHT=175;
     BASE_WIDTH=175;
-    constructor(fontData){
-        super(fontData);
+    constructor(fontData,fontName){
+        super(fontData,fontName);
     }
     getGlyph(qu,wei,isSymbol=false){
         return super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1));

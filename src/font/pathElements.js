@@ -120,6 +120,27 @@ export class CurveTo{
         return `${this.relative ? 'c' : 'C'}${this.x0} ${this.y0}, ${this.x1} ${this.y1}, ${this.x2} ${this.y2}`;
     }
 }
+export class Path{
+    constructor(strokeList=[]){
+        this.__strokeList=strokeList;
+    }
+    add(item){
+        this.__strokeList.push(item);
+    }
+    toSVG(){
+        let x=0, y=0, result=[];
+        for(let item of this.__strokeList){
+            result.push(item.toSVG(x,y));
+            if(!item.next){
+                continue;
+            }
+            let pos=item.next(x,y);
+            x=pos.x;
+            y=pos.y;
+        }
+        return result.join(' ')+' Z';
+    }
+}
 export function pathToSVG(path){
     let x=0, y=0, result=[];
     for(let item of path){

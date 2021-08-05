@@ -3,8 +3,6 @@ import iconv from 'iconv-lite';
 import { FontASC, FontHZK } from './font';
 
 export class FontManager{
-    __ascFontIdx=0;
-    __hzkFontName='HZKPSSTJ';
     constructor(fontData){
         this.__hzkFont={};
         for(let fontName in fontData){
@@ -17,7 +15,7 @@ export class FontManager{
                     this.__hzkSymbolFont=new FontHZK(item.data);
                 break;
                 default:
-                    this.__hzkFont[fontName]=new FontHZK(item.data);
+                    this.__hzkFont[fontName]=new FontHZK(item.data,item.name);
                 break;
             }
         }
@@ -25,19 +23,72 @@ export class FontManager{
             this.__hzkFontName=Object.keys(this.__hzkFont)[0];
         }
     }
-    setFont(ascFont,hzkFont){
+    __checkFontParam(ascFont,hzkFont){
         if(isNaN(ascFont) || null===ascFont || ascFont<0 || ascFont>9){
             throw new ValueError('西文字体必须为0-9的数字');
         }
         if(!this.__hzkFont[hzkFont]){
             throw new ValueError('指定的中文字体不存在');
         }
-        Object.assign(this,{
-            __ascFontIdx:ascFont,
-            __hzkFontName:hzkFont
-        });
     }
-    getGlyph(char){
+    getAscFontList(){
+        return[
+            {
+                label:'Roman',
+                value:0
+            },
+            {
+                label:'Roman Italic',
+                value:1
+            },
+            {
+                label:'Roman Bold',
+                value:2
+            },
+            {
+                label:'Micra',
+                value:3
+            },
+            {
+                label:'Tropical',
+                value:4
+            },
+            {
+                label:'Ancient',
+                value:5
+            },
+            {
+                label:'Arial',
+                value:6
+            },
+            {
+                label:'Arial Italic',
+                value:7
+            },
+            {
+                label:'Gothic',
+                value:8
+            },
+            {
+                label:'Bodoni',
+                value:9
+            }
+        ]
+    }
+    getHzkFontList(){
+        let result=[];
+        for(let fontName in this.__hzkFont){
+            result.push({
+                value:fontName,
+                label:this.__hzkFont[fontName].getFontName()
+            })
+        }
+        return result;
+    }
+    getGlyph(char,ascFont=0,hzkFont){
+        //参数检测
+        this.__checkFontParam(ascFont,hzkFont);
+
         let code=char.charCodeAt(0);
         //控制字符不支持
         if(code<0x20){
@@ -45,7 +96,7 @@ export class FontManager{
         }
         //作为英文字符处理
         if(code<=0x7e){
-            return this.__ascFont.getGlyph(code-0x20,this.__ascFontIdx);
+            return this.__ascFont.getGlyph(code-0x20,ascFont);
         }
         //作为中文字符处理
         let iconvBuf=iconv.encode(char,'GB2312');
@@ -63,7 +114,7 @@ export class FontManager{
             return this.__hzkSymbolFont.getGlyph(qu,wei,true);
         }
         //汉字字库使用
-        return this.__hzkFont[this.__hzkFontName].getGlyph(qu,wei);
+        return this.__hzkFont[hzkFont].getGlyph(qu,wei);
     }
 }
 
