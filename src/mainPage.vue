@@ -11,7 +11,7 @@
             <template v-for='char,idx of state.inputText'>
                 <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='170' height='170'
                     :key='idx' v-if='state.svgPath[char]'>
-                    <path v-for='item,idx of state.svgPath[char].toSVG()' :key='idx' :d='item'/>
+                    <path :d='state.svgPath[char].toSVG()'/>
                 </svg>
             </template>
         </p>
@@ -37,9 +37,14 @@ function updateFont(){
         if(state.svgPath[char]){
             continue;
         }
-        let glyph=store.fontManager.getGlyph(char,state.ascFont,state.hzkFont);
-        state.svgPath[char]=glyph;
+        try{
+            let glyph=store.fontManager.getGlyph(char,state.ascFont,state.hzkFont);
+            state.svgPath[char]=glyph;
+        }catch(e){
+            console.error(e);
+        }
     }
+    console.log(state.svgPath);
 }
 </script>
 <style lang="less" scoped>

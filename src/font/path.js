@@ -73,9 +73,9 @@ export class Rect extends PathElement{
     }
     getBoundingRect(){
         return{
-            x0:Math.min(this.x0,this.y1),
+            x0:Math.min(this.x0,this.x1),
             y0:Math.min(this.y0,this.y1),
-            x1:Math.max(this.x0,this.y1),
+            x1:Math.max(this.x0,this.x1),
             y1:Math.max(this.y0,this.y1),
         }
     }
@@ -164,12 +164,13 @@ export class LineTo extends PathElement{
             y1:Math.max(y,pos.y)
         }
     }
-    toSVG(x=null,y=null){
+    toSVG(){
         if(!this.rx && !this.ry){
             return `L${this.x} ${this.y}`;
         }else if(this.rx && this.ry){
             return `l${this.x} ${this.y}`;
         }
+        let {x,y}=this.getPos();
         return `L${this.rx ? x+this.x : this.x} ${this.ry ? y+this.y : this.y}`;
     }
 }
@@ -206,10 +207,10 @@ export class QuadCurveTo extends PathElement{
         }
         let bbox=this.__bezierInstance.bbox();
         return{
-            x0:bbox.x.min,
-            y0:bbox.y.min,
-            x1:bbox.x.max,
-            y1:bbox.y.max
+            x0:Math.floor(bbox.x.min),
+            y0:Math.floor(bbox.y.min),
+            x1:Math.ceil(bbox.x.max),
+            y1:Math.ceil(bbox.y.max)
         };
     }
     toSVG(){
@@ -251,10 +252,10 @@ export class CurveTo extends PathElement{
         }
         let bbox=this.__bezierInstance.bbox();
         return{
-            x0:bbox.x.min,
-            y0:bbox.y.min,
-            x1:bbox.x.max,
-            y1:bbox.y.max
+            x0:Math.floor(bbox.x.min),
+            y0:Math.floor(bbox.y.min),
+            x1:Math.ceil(bbox.x.max),
+            y1:Math.ceil(bbox.y.max)
         };
     }
     toSVG(){
@@ -264,6 +265,8 @@ export class CurveTo extends PathElement{
 
 export class Path{
     __strokeList=[];
+    __x=0;
+    __y=0;
     __bbox={
         x0:null,
         y0:null,
@@ -282,13 +285,17 @@ export class Path{
         }
     }
     reset(){
-        this.__strokeList=[];
-        this.__bbox={
-            x0:null,
-            y0:null,
-            x1:null,
-            y1:null
-        };
+        Object.assign(this,{
+            __strokeList:[],
+            __bbox:{
+                x0:null,
+                y0:null,
+                x1:null,
+                y1:null
+            },
+            __x:0,
+            __y:0
+        })
     }
     __calculateBoundingRect(item){
         try{
@@ -317,19 +324,29 @@ export class Path{
             console.error('Failed to update bounding box',e);
         }
     }
-    add(itemOrig,prepend=false){
+    add(itemOrig){
         if(!(itemOrig instanceof PathElement)){
             throw new TypeError('Item must inherit class PathElement');
         }
         let item=itemOrig.clone();
-        if(prepend){
+
+        //对画方形操作做特殊处理
+        if(item instanceof Rect){
             this.__strokeList.unshift(item);
-        }else{
-            this.__strokeList.push(item);
+            this.__calculateBoundingRect(item);
+            return;
         }
+        
+        this.__strokeList.push(item);
         if(!(item instanceof MoveTo)){
+            item.setPos(this.__x,this.__y);
             this.__calculateBoundingRect(item);
         }
+        let nextPos=item.next();
+        Object.assign(this,{
+            __x:nextPos.x,
+            __y:nextPos.y
+        });
     }
     getBoundingRect(){
         return {
@@ -337,46 +354,16 @@ export class Path{
         };
     }
     toSVG(){
-        let x=0, y=0, result=[];
-        for(let item of this.__strokeList){
-            result.push(item.toSVG(x,y));
-            if(!item.next){
-                continue;
-            }
-            let pos=item.next(x,y);
-            x=pos.x;
-            y=pos.y;
-        }
-        return result.join(' ')+' Z';
+        return this.__strokeList.map(item=>item.toSVG()).join(' ')+' Z';
     }
 }
-export class Glyph{
-    __pathList=[];
-    constructor(src=[]){
-        let pathList=src;
-        if(src instanceof Glyph){
-            pathList=src.__pathList;
-        }else if(!Array.isArray(src)){
-            throw new TypeError('Initialization parameter must be either an array or an instance of Glyph class');
-        }
-        for(let item of pathList){
-            this.addPath(item);
-        }
+export class Glyph extends Path{
+    __marginLeft=0;
+    __marginRight=0;
+    constructor(src){
+        super(src);
     }
-    reset(){
-        this.__pathList=[];
-    }
-    addPath(item){
-        if(!(item instanceof Path)){
-            throw new TypeError('Item must be instance of Path');
-        }
-        for(let path of this.__pathList){
-            path.merge(item);
-            return;
-        }
-        this.__pathList.push(new Path(item));
-    }
-    toSVG(){
-        return this.__pathList.map(item=>item.toSVG());
+    add(param){
+        super.add(param);
     }
 }

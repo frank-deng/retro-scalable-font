@@ -195,46 +195,30 @@ class Font{
                 processor(data,offset){}
             }
         };
-        let idx=0,result=[],counter=10000;
+        let idx=0,path=new Path(),counter=10000;
         while(idx<=data.length && counter--){
             let ctrl=ctrlTable[data[idx]];
             idx++;
             if(idx>=data.length){
                 break;
             }
-            let obj=ctrl.processor(data,idx);
+            let pathElement=ctrl.processor(data,idx);
             idx+=ctrl.step;
-            if(obj){
-                result.push(obj);
+            if(pathElement){
+                path.add(pathElement);
             }
         }
         if(!counter){
             throw new Error('Dead loop detected');
         }
-        return result;
+        return path;
     }
     getGlyph(idx){
-        let pathElementList=this.__processGlyphData(this.__getGlyphData(idx));
-        let result=new Glyph(), path=new Path(),x=0,y=0;
-        for(let pathElement of pathElementList){
-            if(pathElement instanceof Rect){
-                path.add(pathElement,true);
-                continue;
-            }
-            if(!(pathElement instanceof MoveTo)){
-                pathElement.setPos(x,y);
-            }
-            path.add(pathElement);
-            let pos=pathElement.next();
-            x=pos.x;
-            y=pos.y;
-        }
-        result.addPath(path);
-        return result;
+        return new Glyph(this.__processGlyphData(this.__getGlyphData(idx)));
     }
 }
 export class FontASC extends Font{
-    BASE_HEIGHT=100;
+    BASE_HEIGHT=128;
     constructor(fontData,fontNames){
         super(fontData);
         this.__fontNames=fontNames;
