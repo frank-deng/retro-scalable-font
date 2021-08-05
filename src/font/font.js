@@ -220,6 +220,8 @@ export class Font{
     }
 }
 export class Glyph extends Path{
+    static BASE_HEIGHT=170;
+    static ASCII_BASE_HEIGHT=128;
     __marginLeft=0;
     __marginRight=0;
     constructor(src,ascii=true){
@@ -232,9 +234,15 @@ export class Glyph extends Path{
     isAscii(){
         return this.__ascii;
     }
+    getWidth(){
+        if(!this.isAscii()){
+            return Glyph.BASE_HEIGHT;
+        }else{
+            return this.getBoundingRect().x1*1.21;
+        }
+    }
 }
 export class FontASC extends Font{
-    BASE_HEIGHT=128;
     constructor(fontData,fontNames){
         super(fontData);
         this.__fontNames=fontNames;
@@ -251,8 +259,6 @@ export class FontASC extends Font{
     }
 }
 export class FontHZK extends Font{
-    BASE_HEIGHT=170;
-    BASE_WIDTH=170;
     constructor(fontData,fontName){
         super(fontData,fontName);
     }

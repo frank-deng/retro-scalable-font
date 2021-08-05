@@ -9,9 +9,10 @@
         </el-select>
         <p>
             <template v-for='char,idx of state.inputText'>
-                <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='170' height='170'
-                    :key='idx' v-if='state.svgPath[char]'>
-                    <path :d='state.svgPath[char].toSVG()' :transform='state.svgPath[char].isAscii() ? "translate(0,22)" : ""'/>
+                <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" height='170'
+                    :key='idx' v-if='state.svgPath[char]'
+                    :width='state.svgPath[char].getWidth()'>
+                    <path :d='state.svgPath[char].toSVG()' :transform='state.svgPath[char].isAscii() ? "scale(1.2) translate(0,14)" : ""'/>
                 </svg>
             </template>
         </p>
@@ -49,6 +50,6 @@ function updateFont(){
 </script>
 <style lang="less" scoped>
 .charDisp{
-    border: 1px solid #000000;
+    //border: 1px solid #000000;
 }
 </style>
