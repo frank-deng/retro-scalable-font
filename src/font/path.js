@@ -24,6 +24,11 @@ export class PathElement{
             yStart
         });
     }
+    intersect(){
+        if(!this.hasKey('xStart') || !this.hasKey('yStart')){
+            throw new Error('Start position not specified, unable to calculate intersection');
+        }
+    }
 }
 export class MoveTo extends PathElement{
     constructor(x,y){
@@ -40,6 +45,9 @@ export class MoveTo extends PathElement{
             x:this.x,
             y:this.y
         };
+    }
+    intersect(){
+        throw new Error('Intersection calculation not available for this PathElement');
     }
     toSVG(){
         return `M${this.x} ${this.y}`;
@@ -58,6 +66,9 @@ export class Rect extends PathElement{
     toSVG(){
         let {x0,y0,x1,y1}=this;
         return `M${x0} ${y0} H${x1} V${y1} H${x0} V${y0} Z`
+    }
+    intersect(){
+        
     }
 }
 export class HorLineTo extends PathElement{
