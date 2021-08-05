@@ -11,7 +11,7 @@
             <template v-for='char,idx of state.inputText'>
                 <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='170' height='170'
                     :key='idx' v-if='state.svgPath[char]'>
-                    <path fill-rule="nonzero" v-for='item,idx of state.svgPath[char].toSVG()' :key='idx' :d='item'/>
+                    <path v-for='item,idx of state.svgPath[char].toSVG()' :key='idx' :d='item'/>
                 </svg>
             </template>
         </p>

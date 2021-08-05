@@ -317,36 +317,24 @@ export class Path{
             console.error('Failed to update bounding box',e);
         }
     }
-    add(itemOrig){
+    add(itemOrig,prepend=false){
         if(!(itemOrig instanceof PathElement)){
             throw new TypeError('Item must inherit class PathElement');
         }
-        this.__strokeList.push(itemOrig.clone());
-        if(!(itemOrig instanceof MoveTo)){
-            this.__calculateBoundingRect(itemOrig);
+        let item=itemOrig.clone();
+        if(prepend){
+            this.__strokeList.unshift(item);
+        }else{
+            this.__strokeList.push(item);
+        }
+        if(!(item instanceof MoveTo)){
+            this.__calculateBoundingRect(item);
         }
     }
     getBoundingRect(){
         return {
             ...this.__bbox
         };
-    }
-    merge(path){
-        if(!(path instanceof Path)){
-            throw new TypeError('Item must be instance of Path');
-        }
-        for(let item of path.__strokeList){
-            this.add(item);
-        }
-    }
-    isEmpty(){
-        for(let item of this.__strokeList){
-            if(item instanceof MoveTo){
-                continue;
-            }
-            return false;
-        }
-        return true;
     }
     toSVG(){
         let x=0, y=0, result=[];
@@ -385,12 +373,6 @@ export class Glyph{
         for(let path of this.__pathList){
             path.merge(item);
             return;
-            /*
-            if(!path.intersect(item)){
-                path.merge(item);
-                return;
-            }
-            */
         }
         this.__pathList.push(new Path(item));
     }

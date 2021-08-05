@@ -215,31 +215,21 @@ class Font{
     }
     getGlyph(idx){
         let pathElementList=this.__processGlyphData(this.__getGlyphData(idx));
-        let result=new Glyph(), currentPath=new Path(),x=0,y=0;
-        function __closePath(){
-            if(currentPath.isEmpty()){
-                return;
-            }
-            result.addPath(currentPath);
-            currentPath=new Path();
-        }
+        let result=new Glyph(), path=new Path(),x=0,y=0;
         for(let pathElement of pathElementList){
             if(pathElement instanceof Rect){
-                result.addPath(new Path([pathElement]));
+                path.add(pathElement,true);
                 continue;
             }
             if(!(pathElement instanceof MoveTo)){
                 pathElement.setPos(x,y);
             }
+            path.add(pathElement);
             let pos=pathElement.next();
-            if(pathElement instanceof MoveTo || (pos.x==x && pos.y==y)){
-                __closePath();
-            }
-            currentPath.add(pathElement);
             x=pos.x;
             y=pos.y;
         }
-        __closePath();
+        result.addPath(path);
         return result;
     }
 }
