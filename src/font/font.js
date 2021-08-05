@@ -228,7 +228,10 @@ class Font{
                 result.addPath(new Path([pathElement]));
                 continue;
             }
-            let pos=pathElement.next(x,y);
+            if(!(pathElement instanceof MoveTo)){
+                pathElement.setPos(x,y);
+            }
+            let pos=pathElement.next();
             if(pathElement instanceof MoveTo || (pos.x==x && pos.y==y)){
                 __closePath();
             }

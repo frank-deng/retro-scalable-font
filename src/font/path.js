@@ -2,15 +2,23 @@ import { FontManager } from ".";
 
 export class PathElement{
     constructor(){
-        //这是个抽象类，不能实例化
         if (PathElement==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
         }
     }
+    __init__(item){
+        if(!(item instanceof this.constructor)){
+            throw new TypeError('Source object must be instance of PathElement');
+        }
+        if(undefined!==this.xStart && undefined!==this.yStart){
+            item.setPos(this.xStart,this.yStart);
+        }
+        return item;
+    }
     clone(){
         throw new Error('clone() method not implemented');
     }
-    setStartPos(xStart,yStart){
+    setPos(xStart,yStart){
         Object.assign(this,{
             xStart,
             yStart
@@ -25,9 +33,9 @@ export class MoveTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x,this.y);
+        return super.__init__(new this.constructor(this.x,this.y));
     }
-    next(x,y){
+    next(){
         return {
             x:this.x,
             y:this.y
@@ -45,7 +53,7 @@ export class Rect extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x0,this.y0,this.x1,this.y1);
+        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1));
     }
     toSVG(){
         let {x0,y0,x1,y1}=this;
@@ -60,12 +68,12 @@ export class HorLineTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x);
+        return super.__init__(new this.constructor(this.x));
     }
-    next(x,y){
+    next(){
         return {
             x:this.x,
-            y
+            y:this.yStart
         };
     }
     toSVG(){
@@ -80,11 +88,11 @@ export class VerLineTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.y);
+        return super.__init__(new this.constructor(this.y));
     }
-    next(x,y){
+    next(){
         return {
-            x,
+            x:this.xStart,
             y:this.y
         };
     }
@@ -100,12 +108,12 @@ export class LineTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x,this.y,this.rx,this.ry);
+        return super.__init__(new this.constructor(this.x,this.y,this.rx,this.ry));
     }
-    next(x,y){
+    next(){
         return {
-            x:this.rx ? x+this.x : this.x,
-            y:this.ry ? y+this.y : this.y
+            x:this.rx ? this.xStart+this.x : this.x,
+            y:this.ry ? this.yStart+this.y : this.y
         };
     }
     toSVG(x=null,y=null){
@@ -125,12 +133,12 @@ export class QuadCurveTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x0,this.y0,this.x1,this.y1,this.relative);
+        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.relative));
     }
-    next(x,y){
+    next(){
         return {
-            x:this.relative ? x+this.x1 : this.x1,
-            y:this.relative ? y+this.y1 : this.y1
+            x:this.relative ? this.xStart+this.x1 : this.x1,
+            y:this.relative ? this.yStart+this.y1 : this.y1
         };
     }
     toSVG(){
@@ -145,12 +153,12 @@ export class CurveTo extends PathElement{
         });
     }
     clone(){
-        return new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative);
+        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative));
     }
-    next(x,y){
+    next(){
         return {
-            x:this.relative ? x+this.x2 : this.x2,
-            y:this.relative ? y+this.y2 : this.y2
+            x:this.relative ? this.xStart+this.x2 : this.x2,
+            y:this.relative ? this.yStart+this.y2 : this.y2
         };
     }
     toSVG(){
@@ -159,9 +167,12 @@ export class CurveTo extends PathElement{
 }
 export class Path{
     __strokeList=[];
-    constructor(strokeList=[]){
-        if(strokeList instanceof Path){
-            strokeList=strokeList.__strokeList;
+    constructor(src=[]){
+        let strokeList=src;
+        if(src instanceof Path){
+            strokeList=src.__strokeList;
+        }else if(!Array.isArray(src)){
+            throw new TypeError('Initialization parameter must be either an array or an instance of Path class');
         }
         for(let item of strokeList){
             this.add(item);
@@ -209,16 +220,16 @@ export class Path{
 }
 export class Glyph{
     __pathList=[];
-    constructor(pathList=[]){
-        if(pathList instanceof Glyph){
-            pathList=pathList.__pathList;
+    constructor(src=[]){
+        let pathList=src;
+        if(src instanceof Glyph){
+            pathList=src.__pathList;
+        }else if(!Array.isArray(src)){
+            throw new TypeError('Initialization parameter must be either an array or an instance of Glyph class');
         }
         for(let item of pathList){
             this.addPath(item);
         }
-    }
-    clone(){
-        return new this.constructor(this);
     }
     reset(){
         this.__pathList=[];
