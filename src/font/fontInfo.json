@@ -1,6 +1,18 @@
 {
     "ASCPS":{
-        "type":"ascii"
+        "type":"ascii",
+        "fontNames":[
+            "Roman",
+            "Roman Italic",
+            "Roman Bold",
+            "Micra",
+            "Tropical",
+            "Ancient",
+            "Arial",
+            "Arial Italic",
+            "Gothic",
+            "Bodoni"
+        ]
     },
     "HZKPST":{
         "type":"fuhao"

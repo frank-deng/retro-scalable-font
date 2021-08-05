@@ -263,8 +263,12 @@ class Font{
 }
 export class FontASC extends Font{
     BASE_HEIGHT=175;
-    constructor(fontData){
+    constructor(fontData,fontNames){
         super(fontData);
+        this.__fontNames=fontNames;
+    }
+    getFontNames(){
+        return this.__fontNames;
     }
     getGlyph(charIdx,fontIdx=0){
         //处理英文空格

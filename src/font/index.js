@@ -9,7 +9,7 @@ export class FontManager{
             let item=fontData[fontName];
             switch(item.type){
                 case 'ascii':
-                    this.__ascFont=new FontASC(item.data);
+                    this.__ascFont=new FontASC(item.data,item.fontNames);
                 break;
                 case 'fuhao':
                     this.__hzkSymbolFont=new FontHZK(item.data);
@@ -32,48 +32,10 @@ export class FontManager{
         }
     }
     getAscFontList(){
-        return[
-            {
-                label:'Roman',
-                value:0
-            },
-            {
-                label:'Roman Italic',
-                value:1
-            },
-            {
-                label:'Roman Bold',
-                value:2
-            },
-            {
-                label:'Micra',
-                value:3
-            },
-            {
-                label:'Tropical',
-                value:4
-            },
-            {
-                label:'Ancient',
-                value:5
-            },
-            {
-                label:'Arial',
-                value:6
-            },
-            {
-                label:'Arial Italic',
-                value:7
-            },
-            {
-                label:'Gothic',
-                value:8
-            },
-            {
-                label:'Bodoni',
-                value:9
-            }
-        ]
+        return this.__ascFont.getFontNames().map((label,value)=>({
+            label,
+            value
+        }));
     }
     getHzkFontList(){
         let result=[];
