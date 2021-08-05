@@ -5,8 +5,10 @@ import {
     MoveTo,
     LineTo,
     CurveTo,
-    QuadCurveTo
-} from './pathElements';
+    QuadCurveTo,
+    Path,
+    Glyph
+} from './path';
 function getNum8(data,offset){
     return (data[offset]<<4)|data[offset+1];
 }
@@ -211,25 +213,25 @@ class Font{
         }
         return result;
     }
-    __getClosedPaths(actions){
-        let result=[], currentPath=[],x=0,y=0;
+    __getPaths(actions){
+        let result=[], currentPath=new Path(),x=0,y=0;
         function __closePath(){
-            if(!currentPath.length){
+            if(currentPath.isEmpty()){
                 return;
             }
             result.push(currentPath);
-            currentPath=[];
+            currentPath=new Path();
         }
         for(let action of actions){
             if(action instanceof Rect){
-                result.push([action]);
+                result.push(new Path([action]));
                 continue;
             }
             let pos=action.next(x,y);
             if(action instanceof MoveTo || (pos.x==x && pos.y==y)){
                 __closePath();
             }
-            currentPath.push(action);
+            currentPath.add(action);
             x=pos.x;
             y=pos.y;
         }
@@ -237,28 +239,16 @@ class Font{
         return result;
     }
     __mergeClosedPaths(pathList){
-        let result=[],group=[];
-        function __addGroup(){
-            if(group.length){
-                result.push(group);
-                group=[];
-            }
-        }
+        let result=new Glyph(), currentPath=new Path();
         for(let item of pathList){
-            if(1==item.length){
-                __addGroup();
-                result.push(item);
-                continue;
-            }
-            group=group.concat(item);
+            currentPath.merge(item);
         }
-        __addGroup();
+        result.addPath(currentPath);
         return result;
     }
     getGlyph(idx){
-        return {
-            path:this.__mergeClosedPaths(this.__getClosedPaths(this.__processGlyphData(this.__getGlyphData(idx))))
-        }
+        let value=this.__mergeClosedPaths(this.__getPaths(this.__processGlyphData(this.__getGlyphData(idx))));
+        return value;
     }
 }
 export class FontASC extends Font{

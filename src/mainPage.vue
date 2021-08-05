@@ -11,7 +11,7 @@
             <template v-for='char,idx of state.inputText'>
                 <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='175' height='175'
                     :key='idx' v-if='state.svgPath[char]'>
-                    <path fill-rule="evenodd" v-for='item of state.svgPath[char]' :key='item' :d='item'/>
+                    <path fill-rule="evenodd" v-for='item,idx of state.svgPath[char].toSVG()' :key='idx' :d='item'/>
                 </svg>
             </template>
         </p>
@@ -19,7 +19,6 @@
 </template>
 <script setup>
 import {inject, reactive} from 'vue';
-import {pathToSVG} from '/@/font/pathElements.js';
 const store=inject('store');
 const state=reactive({
     inputText:'',
@@ -38,15 +37,9 @@ function updateFont(){
         if(state.svgPath[char]){
             continue;
         }
-        let paths=store.fontManager.getGlyph(char,state.ascFont,state.hzkFont).path.map(path=>pathToSVG(path));
-        state.svgPath[char]=paths;
+        let glyph=store.fontManager.getGlyph(char,state.ascFont,state.hzkFont);
+        state.svgPath[char]=glyph;
     }
-
-    /*
-    for(let char of state.inputText){
-        console.log(store.fontManager.getGlyph(char));
-    }
-    */
 }
 </script>
 <style lang="less" scoped>
