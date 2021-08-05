@@ -24,10 +24,14 @@ export class PathElement{
             yStart
         });
     }
-    intersect(){
-        if(!this.hasKey('xStart') || !this.hasKey('yStart')){
-            throw new Error('Start position not specified, unable to calculate intersection');
+    getPos(){
+        if(undefined!==this.xStart && undefined!==this.yStart){
+            throw new Error('Start position not specified');
         }
+        return {
+            x:this.xStart,
+            y:this.yStart
+        };
     }
 }
 export class MoveTo extends PathElement{
@@ -46,8 +50,8 @@ export class MoveTo extends PathElement{
             y:this.y
         };
     }
-    intersect(){
-        throw new Error('Intersection calculation not available for this PathElement');
+    getBoundingRect(){
+        throw new Error(`Bounding rectangle calculation not available for MoveTo`);
     }
     toSVG(){
         return `M${this.x} ${this.y}`;
@@ -67,8 +71,13 @@ export class Rect extends PathElement{
         let {x0,y0,x1,y1}=this;
         return `M${x0} ${y0} H${x1} V${y1} H${x0} V${y0} Z`
     }
-    intersect(){
-        
+    getBoundingRect(){
+        return{
+            x0:this.x0,
+            y0:this.y0,
+            x1:this.x1,
+            y1:this.y1
+        }
     }
 }
 export class HorLineTo extends PathElement{
@@ -86,6 +95,15 @@ export class HorLineTo extends PathElement{
             x:this.x,
             y:this.yStart
         };
+    }
+    getBoundingRect(){
+        let {x,y}=this.getPos();
+        return{
+            x0:x,
+            y0:y,
+            x1:this.x,
+            y1:y
+        }
     }
     toSVG(){
         return `H${this.x}`;
@@ -107,6 +125,15 @@ export class VerLineTo extends PathElement{
             y:this.y
         };
     }
+    getBoundingRect(){
+        let {x,y}=this.getPos();
+        return{
+            x0:x,
+            y0:y,
+            x1:x,
+            y1:this.y
+        }
+    }
     toSVG(){
         return `V${this.y}`;
     }
@@ -126,6 +153,16 @@ export class LineTo extends PathElement{
             x:this.rx ? this.xStart+this.x : this.x,
             y:this.ry ? this.yStart+this.y : this.y
         };
+    }
+    getBoundingRect(){
+        let {x,y}=this.getPos();
+        let pos=this.next();
+        return{
+            x0:x,
+            y0:y,
+            x1:pos.x,
+            y1:pos.y
+        }
     }
     toSVG(x=null,y=null){
         if(!this.rx && !this.ry){
@@ -176,6 +213,7 @@ export class CurveTo extends PathElement{
         return `${this.relative ? 'c' : 'C'}${this.x0} ${this.y0}, ${this.x1} ${this.y1}, ${this.x2} ${this.y2}`;
     }
 }
+
 export class Path{
     __strokeList=[];
     constructor(src=[]){
@@ -214,6 +252,11 @@ export class Path{
             return false;
         }
         return true;
+    }
+    intersect(path){
+        if(!(path instanceof Path)){
+            throw new TypeError('Intersection detection only supported between Path instances.');
+        }
     }
     toSVG(){
         let x=0, y=0, result=[];
