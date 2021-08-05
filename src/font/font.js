@@ -214,7 +214,7 @@ class Font{
         return path;
     }
     getGlyph(idx){
-        return new Glyph(this.__processGlyphData(this.__getGlyphData(idx)));
+        return this.__processGlyphData(this.__getGlyphData(idx));
     }
 }
 export class FontASC extends Font{
@@ -233,7 +233,7 @@ export class FontASC extends Font{
                 width:50
             };
         }
-        return super.getGlyph((charIdx-1)+fontIdx*94);
+        return new Glyph(super.getGlyph((charIdx-1)+fontIdx*94));
     }
 }
 export class FontHZK extends Font{
@@ -243,6 +243,6 @@ export class FontHZK extends Font{
         super(fontData,fontName);
     }
     getGlyph(qu,wei,isSymbol=false){
-        return super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1));
+        return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)));
     }
 }
