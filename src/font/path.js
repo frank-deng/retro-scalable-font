@@ -42,7 +42,7 @@ export class MoveTo extends PathElement{
         });
     }
     clone(){
-        return super.__init__(new this.constructor(this.x,this.y));
+        return new this.constructor(this.x,this.y);
     }
     next(){
         return {
@@ -65,7 +65,7 @@ export class Rect extends PathElement{
         });
     }
     clone(){
-        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1));
+        return new this.constructor(this.x0,this.y0,this.x1,this.y1);
     }
     toSVG(){
         let {x0,y0,x1,y1}=this;
@@ -355,15 +355,5 @@ export class Path{
     }
     toSVG(){
         return this.__strokeList.map(item=>item.toSVG()).join(' ')+' Z';
-    }
-}
-export class Glyph extends Path{
-    __marginLeft=0;
-    __marginRight=0;
-    constructor(src){
-        super(src);
-    }
-    add(param){
-        super.add(param);
     }
 }

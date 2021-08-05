@@ -6,8 +6,7 @@ import {
     LineTo,
     CurveTo,
     QuadCurveTo,
-    Path,
-    Glyph
+    Path
 } from './path';
 function getNum8(data,offset){
     return (data[offset]<<4)|data[offset+1];
@@ -23,9 +22,8 @@ function getNum6Pair(data,offset){
     n0&=31; n1&=31;
     return [s0 ? -n0 : n0, s1 ? -n1 : n1];
 }
-class Font{
+export class Font{
     constructor(fontData,fontName=null){
-        //这是个抽象类，不能实例化
         if (Font==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
         }
@@ -214,7 +212,25 @@ class Font{
         return path;
     }
     getGlyph(idx){
-        return this.__processGlyphData(this.__getGlyphData(idx));
+        let glyphData=this.__getGlyphData(idx);
+        if(!glyphData || !glyphData.length){
+            return new Path();
+        }
+        return this.__processGlyphData(glyphData);
+    }
+}
+export class Glyph extends Path{
+    __marginLeft=0;
+    __marginRight=0;
+    constructor(src,ascii=true){
+        super(src);
+        this.__ascii=ascii;
+    }
+    add(param){
+        super.add(param);
+    }
+    isAscii(){
+        return this.__ascii;
     }
 }
 export class FontASC extends Font{
@@ -229,9 +245,7 @@ export class FontASC extends Font{
     getGlyph(charIdx,fontIdx=0){
         //处理英文空格
         if(0==charIdx){
-            return {
-                width:50
-            };
+            return new Glyph();
         }
         return new Glyph(super.getGlyph((charIdx-1)+fontIdx*94));
     }
@@ -243,6 +257,6 @@ export class FontHZK extends Font{
         super(fontData,fontName);
     }
     getGlyph(qu,wei,isSymbol=false){
-        return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)));
+        return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);
     }
 }

@@ -11,7 +11,7 @@
             <template v-for='char,idx of state.inputText'>
                 <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='170' height='170'
                     :key='idx' v-if='state.svgPath[char]'>
-                    <path :d='state.svgPath[char].toSVG()'/>
+                    <path :d='state.svgPath[char].toSVG()' :transform='state.svgPath[char].isAscii() ? "translate(0,22)" : ""'/>
                 </svg>
             </template>
         </p>

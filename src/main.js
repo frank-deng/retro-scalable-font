@@ -6,3 +6,6 @@ import 'element-plus/lib/theme-chalk/index.css';
 createApp(App)
     .use(ElementPlus)
     .mount('#app');
+
+import testFunc from '/@/font/test.js';
+testFunc();
