@@ -213,42 +213,31 @@ class Font{
         }
         return result;
     }
-    __getPaths(actions){
-        let result=[], currentPath=new Path(),x=0,y=0;
+    getGlyph(idx){
+        let pathElementList=this.__processGlyphData(this.__getGlyphData(idx));
+        let result=new Glyph(), currentPath=new Path(),x=0,y=0;
         function __closePath(){
             if(currentPath.isEmpty()){
                 return;
             }
-            result.push(currentPath);
+            result.addPath(currentPath);
             currentPath=new Path();
         }
-        for(let action of actions){
-            if(action instanceof Rect){
-                result.push(new Path([action]));
+        for(let pathElement of pathElementList){
+            if(pathElement instanceof Rect){
+                result.addPath(new Path([pathElement]));
                 continue;
             }
-            let pos=action.next(x,y);
-            if(action instanceof MoveTo || (pos.x==x && pos.y==y)){
+            let pos=pathElement.next(x,y);
+            if(pathElement instanceof MoveTo || (pos.x==x && pos.y==y)){
                 __closePath();
             }
-            currentPath.add(action);
+            currentPath.add(pathElement);
             x=pos.x;
             y=pos.y;
         }
         __closePath();
         return result;
-    }
-    __mergeClosedPaths(pathList){
-        let result=new Glyph(), currentPath=new Path();
-        for(let item of pathList){
-            currentPath.merge(item);
-        }
-        result.addPath(currentPath);
-        return result;
-    }
-    getGlyph(idx){
-        let value=this.__mergeClosedPaths(this.__getPaths(this.__processGlyphData(this.__getGlyphData(idx))));
-        return value;
     }
 }
 export class FontASC extends Font{

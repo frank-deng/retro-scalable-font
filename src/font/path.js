@@ -161,18 +161,11 @@ export class Path{
     __strokeList=[];
     constructor(strokeList=[]){
         if(strokeList instanceof Path){
-            return strokeList.clone();
+            strokeList=strokeList.__strokeList;
         }
         for(let item of strokeList){
             this.add(item);
         }
-    }
-    clone(){
-        let newPath=new Path();
-        for(let item of this.__strokeList){
-            newPath.add(item);
-        }
-        return newPath;
     }
     reset(){
         this.__strokeList=[];
@@ -218,20 +211,27 @@ export class Glyph{
     __pathList=[];
     constructor(pathList=[]){
         if(pathList instanceof Glyph){
-            return pathList.clone();
+            pathList=pathList.__pathList;
         }
         for(let item of pathList){
             this.addPath(item);
         }
     }
     clone(){
-        return new Glyph(this.__pathList);
+        return new this.constructor(this);
+    }
+    reset(){
+        this.__pathList=[];
     }
     addPath(item){
         if(!(item instanceof Path)){
             throw new TypeError('Item must be instance of Path');
         }
-        this.__pathList.push(item.clone());
+        if(!this.__pathList.length){
+            this.__pathList.push(new Path(item));
+            return;
+        }
+        this.__pathList[0].merge(item);
     }
     toSVG(){
         return this.__pathList.map(item=>item.toSVG());
