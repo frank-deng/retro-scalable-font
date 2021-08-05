@@ -1,4 +1,6 @@
-import { FontManager } from ".";
+import { Bezier } from 'bezier-js/dist/bezier.js';
+import Intersection from './intersection';
+import Insection from './intersection';
 
 export class PathElement{
     constructor(){
@@ -25,7 +27,7 @@ export class PathElement{
         });
     }
     getPos(){
-        if(undefined!==this.xStart && undefined!==this.yStart){
+        if(undefined===this.xStart || undefined===this.yStart){
             throw new Error('Start position not specified');
         }
         return {
@@ -73,10 +75,10 @@ export class Rect extends PathElement{
     }
     getBoundingRect(){
         return{
-            x0:this.x0,
-            y0:this.y0,
-            x1:this.x1,
-            y1:this.y1
+            x0:Math.min(this.x0,this.y1),
+            y0:Math.min(this.y0,this.y1),
+            x1:Math.max(this.x0,this.y1),
+            y1:Math.max(this.y0,this.y1),
         }
     }
 }
@@ -99,9 +101,9 @@ export class HorLineTo extends PathElement{
     getBoundingRect(){
         let {x,y}=this.getPos();
         return{
-            x0:x,
+            x0:Math.min(x,this.x),
             y0:y,
-            x1:this.x,
+            x1:Math.max(x,this.x),
             y1:y
         }
     }
@@ -129,9 +131,9 @@ export class VerLineTo extends PathElement{
         let {x,y}=this.getPos();
         return{
             x0:x,
-            y0:y,
+            y0:Math.min(y,this.y),
             x1:x,
-            y1:this.y
+            y1:Math.max(y,this.y)
         }
     }
     toSVG(){
@@ -158,10 +160,10 @@ export class LineTo extends PathElement{
         let {x,y}=this.getPos();
         let pos=this.next();
         return{
-            x0:x,
-            y0:y,
-            x1:pos.x,
-            y1:pos.y
+            x0:Math.min(x,pos.x),
+            y0:Math.min(y,pos.y),
+            x1:Math.max(x,pos.x),
+            y1:Math.max(y,pos.y)
         }
     }
     toSVG(x=null,y=null){
@@ -174,11 +176,22 @@ export class LineTo extends PathElement{
     }
 }
 export class QuadCurveTo extends PathElement{
+    __bezierInstance=null;
     constructor(x0,y0,x1,y1,relative=false){
         super();
         Object.assign(this,{
             x0,y0,x1,y1,relative
         });
+    }
+    setPos(x,y){
+        super.setPos(x,y);
+        this.__bezierInstance=new Bezier(
+            x,y,
+            this.relative ? x+this.x0 : this.x0,
+            this.relative ? y+this.y0 : this.y0,
+            this.relative ? x+this.x1 : this.x1,
+            this.relative ? y+this.y1 : this.y1
+        );
     }
     clone(){
         return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.relative));
@@ -189,11 +202,24 @@ export class QuadCurveTo extends PathElement{
             y:this.relative ? this.yStart+this.y1 : this.y1
         };
     }
+    getBoundingRect(){
+        if(!this.__bezierInstance){
+            throw new Error('Start position not set');
+        }
+        let bbox=this.__bezierInstance.bbox();
+        return{
+            x0:bbox.x.min,
+            y0:bbox.y.min,
+            x1:bbox.x.max,
+            y1:bbox.y.max
+        };
+    }
     toSVG(){
         return `${this.relative ? 'q' : 'Q'}${this.x0} ${this.y0}, ${this.x1} ${this.y1}`;
     }
 }
 export class CurveTo extends PathElement{
+    __bezierInstance=null;
     constructor(x0,y0,x1,y1,x2,y2,relative=false){
         super();
         Object.assign(this,{
@@ -203,10 +229,34 @@ export class CurveTo extends PathElement{
     clone(){
         return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative));
     }
+    setPos(x,y){
+        super.setPos(x,y);
+        this.__bezierInstance=new Bezier(
+            x,y,
+            this.relative ? x+this.x0 : this.x0,
+            this.relative ? y+this.y0 : this.y0,
+            this.relative ? x+this.x1 : this.x1,
+            this.relative ? y+this.y1 : this.y1,
+            this.relative ? x+this.x2 : this.x2,
+            this.relative ? y+this.y2 : this.y2
+        );
+    }
     next(){
         return {
             x:this.relative ? this.xStart+this.x2 : this.x2,
             y:this.relative ? this.yStart+this.y2 : this.y2
+        };
+    }
+    getBoundingRect(){
+        if(!this.__bezierInstance){
+            throw new Error('Start position not set');
+        }
+        let bbox=this.__bezierInstance.bbox();
+        return{
+            x0:bbox.x.min,
+            y0:bbox.y.min,
+            x1:bbox.x.max,
+            y1:bbox.y.max
         };
     }
     toSVG(){
@@ -216,6 +266,12 @@ export class CurveTo extends PathElement{
 
 export class Path{
     __strokeList=[];
+    __bbox={
+        x0:null,
+        y0:null,
+        x1:null,
+        y1:null
+    }
     constructor(src=[]){
         let strokeList=src;
         if(src instanceof Path){
@@ -229,12 +285,53 @@ export class Path{
     }
     reset(){
         this.__strokeList=[];
+        this.__bbox={
+            x0:null,
+            y0:null,
+            x1:null,
+            y1:null
+        };
+    }
+    __calculateBoundingRect(item){
+        try{
+            let bbox=item.getBoundingRect();
+            let {x0,y0,x1,y1}=this.__bbox;
+            let xMin=Math.floor(Math.min(bbox.x0,bbox.x1)),
+                xMax=Math.ceil(Math.max(bbox.x0,bbox.x1)),
+                yMin=Math.floor(Math.min(bbox.y0,bbox.y1)),
+                yMax=Math.ceil(Math.max(bbox.y0,bbox.y1));
+            if(null===x0 || xMin<x0){
+                x0=xMin;
+            }
+            if(null===x1 || xMax>x1){
+                x1=xMax;
+            }
+            if(null===y0 || yMin<y0){
+                y0=yMin;
+            }
+            if(null===y1 || yMax>y1){
+                y1=yMax;
+            }
+            Object.assign(this.__bbox,{
+                x0,y0,x1,y1
+            })
+        }catch(e){
+            console.error('Failed to update bounding box',e);
+        }
     }
     add(itemOrig){
         if(!(itemOrig instanceof PathElement)){
             throw new TypeError('Item must inherit class PathElement');
         }
         this.__strokeList.push(itemOrig.clone());
+        if(!(itemOrig instanceof MoveTo)){
+            this.__calculateBoundingRect(itemOrig);
+        }
+    }
+    getBoundingRect(){
+        return {
+            ...this.__bbox
+        };
     }
     merge(path){
         if(!(path instanceof Path)){
@@ -257,6 +354,16 @@ export class Path{
         if(!(path instanceof Path)){
             throw new TypeError('Intersection detection only supported between Path instances.');
         }
+        let strokeListA=this.__strokeList.filter(item=>(!(item instanceof MoveTo)));
+        let strokeListB=path.__strokeList.filter(item=>(!(item instanceof MoveTo)));
+        for(let a of strokeListA){
+            for(let b of strokeListB){
+                if(Intersection.calculate(a,b)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     toSVG(){
         let x=0, y=0, result=[];
@@ -292,11 +399,13 @@ export class Glyph{
         if(!(item instanceof Path)){
             throw new TypeError('Item must be instance of Path');
         }
-        if(!this.__pathList.length){
-            this.__pathList.push(new Path(item));
-            return;
+        for(let path of this.__pathList){
+            if(!path.intersect(item)){
+                path.merge(item);
+                return;
+            }
         }
-        this.__pathList[0].merge(item);
+        this.__pathList.push(new Path(item));
     }
     toSVG(){
         return this.__pathList.map(item=>item.toSVG());

@@ -1,5 +1,3 @@
-import { Bezier } from 'bezier-js';
-import BoxCollide from 'box-collide';
 import {
     checkIntersection,
     colinearPointWithinSegment
@@ -7,7 +5,7 @@ import {
 import {
     Rect,HorLineTo,VerLineTo,LineTo,CurveTo,QuadCurveTo
 } from './path';
-export class Intersection{
+export default class Intersection{
     static __checkType(src){
         let result=null;
         if(!result){
@@ -42,67 +40,36 @@ export class Intersection{
             [pos0.x,pos0.y,pos1.x,pos1.y]
         ];
     }
-    static __getCurve(src){
-        let startPos=src.getPos(), nextPos=src.next();
-        if(src instanceof QuadCurveTo){
-            return new Bezier([
-                {
-                    x:startPos.x,
-                    y:startPos.y
-                },
-                {
-                    x:src.relative ? src.xStart+src.x0 : src.x0,
-                    y:src.relative ? src.yStart+src.y0 : src.y0
-                },
-                {
-                    x:nextPos.x,
-                    y:nextPos.y
-                },
-            ]);
-        }else if (src instanceof CurveTo){
-            let nextPos=src.next();
-            return new Bezier([
-                {
-                    x:src.xStart,
-                    y:src.yStart
-                },
-                {
-                    x:src.relative ? src.xStart+src.x0 : src.x0,
-                    y:src.relative ? src.yStart+src.y0 : src.y0
-                },
-                {
-                    x:src.relative ? src.xStart+src.x1 : src.x1,
-                    y:src.relative ? src.yStart+src.y1 : src.y1
-                },
-                {
-                    x:nextPos.x,
-                    y:nextPos.y
-                },
-            ]);
-        }
-    }
     static __lineIntersect(a,b){
         let intersection=checkIntersection(a[0],a[1],a[2],a[3],b[0],b[1],b[2],b[3]);
-        if('intersecting'==intersection.type){
-            return true;
-        }else if('colinear'==intersection.type){
-            return colinearPointWithinSegment(a[0],a[1],b[0],b[1],b[2],b[3])
-                || colinearPointWithinSegment(a[2],a[3],b[0],b[1],b[2],b[3])
+        switch(intersection.type){
+            case 'intersecting':
+                return true;
+            case 'colinear':
+                return colinearPointWithinSegment(a[0],a[1],b[0],b[1],b[2],b[3])
+                    || colinearPointWithinSegment(a[2],a[3],b[0],b[1],b[2],b[3]);
         }
         return false;
     }
     static calculate(a,b){
-        if(!(a instanceof PathElement) || !(b instanceof PathElement)){
-            throw new TypeError('Intersection calculation only supported between PathElement instances.');
+        //Determine types of a,b, lines or a curve, error will be thown when source type is not supported
+        let typeA=Intersection.__checkType(a), typeB=Intersection.__checkType(b),
+            dataA=null, dataB=null;
+        if('line'==typeA){
+            dataA=Intersection.__getLines(a);
+        }else if('curve'==typeA){
+            dataA=a.__bezierInstance;
+        }
+        if('line'==typeB){
+            dataB=Intersection.__getLines(b);
+        }else if('curve'==typeB){
+            dataB=b.__bezierInstance;
         }
 
-        //Determine types of a,b, lines or a curve, error will be thown when source type is not supported
-        let typeA=Intersection.__checkType(a), typeB=Intersection.__checkType(b);
+        //Data ready, start calculation
         if('line'==typeA && 'line'==typeB){
-            linesA=Intersection.__getLines(a);
-            linesB=Intersection.__getLines(b);
-            for(let lineA of linesA){
-                for(let lineB of linesB){
+            for(let lineA of dataA){
+                for(let lineB of dataB){
                     if(Intersection.__lineIntersect(lineA,lineB)){
                         return true;
                     }
@@ -111,8 +78,41 @@ export class Intersection{
             return false;
         }
         if('line'==typeA && 'curve'==typeB){
-            linesA=Intersection.__getLines(a);
-            curve=Intersection.__getCurve(b);
+            for(let line of dataA){
+                if(dataB.intersects({
+                    p1:{
+                        x:line[0],
+                        y:line[1]
+                    },
+                    p2:{
+                        x:line[2],
+                        y:line[3]
+                    }
+                }).length){
+                    return true;
+                }
+            }
+            return false;
+        }
+        if('curve'==typeA && 'line'==typeB){
+            for(let line of dataB){
+                if(dataA.intersects({
+                    p1:{
+                        x:line[0],
+                        y:line[1]
+                    },
+                    p2:{
+                        x:line[2],
+                        y:line[3]
+                    }
+                }).length){
+                    return true;
+                }
+            }
+            return false;
+        }
+        if('curve'==typeA && 'curve'==typeB){
+            return !!(dataA.intersects(dataB).length);
         }
     }
 }

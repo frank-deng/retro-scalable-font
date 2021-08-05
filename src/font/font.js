@@ -244,7 +244,7 @@ class Font{
     }
 }
 export class FontASC extends Font{
-    BASE_HEIGHT=175;
+    BASE_HEIGHT=100;
     constructor(fontData,fontNames){
         super(fontData);
         this.__fontNames=fontNames;
@@ -256,15 +256,15 @@ export class FontASC extends Font{
         //处理英文空格
         if(0==charIdx){
             return {
-                width:100
+                width:50
             };
         }
         return super.getGlyph((charIdx-1)+fontIdx*94);
     }
 }
 export class FontHZK extends Font{
-    BASE_HEIGHT=175;
-    BASE_WIDTH=175;
+    BASE_HEIGHT=170;
+    BASE_WIDTH=170;
     constructor(fontData,fontName){
         super(fontData,fontName);
     }
