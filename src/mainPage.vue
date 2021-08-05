@@ -8,9 +8,12 @@
             <el-option v-for='item of state.hzkFontList' :key='item.value' :value='item.value' :label='item.label'></el-option>
         </el-select>
         <p>
-            <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='175' height='175'>
-                <path fill-rule="evenodd" v-for='item of state.svgPath' :key='item' :d='item'/>
-            </svg>
+            <template v-for='char,idx of state.inputText'>
+                <svg class='charDisp' xmlns="http://www.w3.org/2000/svg" version="1.1" width='175' height='175'
+                    :key='idx' v-if='state.svgPath[char]'>
+                    <path fill-rule="evenodd" v-for='item of state.svgPath[char]' :key='item' :d='item'/>
+                </svg>
+            </template>
         </p>
     </div>
 </template>
@@ -24,16 +27,19 @@ const state=reactive({
     hzkFontList:store.fontManager.getHzkFontList(),
     ascFont:0,
     hzkFont:'HZKPSSTJ',
-    svgPath:[]
+    svgPath:{}
 });
 function updateFont(){
     if(!state.inputText){
         return;
     }
-    state.svgPath=[];
-    let pathGroups=store.fontManager.getGlyph(state.inputText[0],state.ascFont,state.hzkFont);
-    for(let path of pathGroups.path){
-        state.svgPath.push(pathToSVG(path));
+    state.svgPath={};
+    for(let char of state.inputText){
+        if(state.svgPath[char]){
+            continue;
+        }
+        let paths=store.fontManager.getGlyph(char,state.ascFont,state.hzkFont).path.map(path=>pathToSVG(path));
+        state.svgPath[char]=paths;
     }
 
     /*
