@@ -1,15 +1,18 @@
 <template>
-    <svg :height='state.svgHeight' :width='Math.min(state.svgWidth,props.maxWidth)'>
-        <path
-            v-for='char of state.charList'
-            :key='char.id'
-            :fill-rule='char.fillRule'
-            :d='char.path'
-            :transform='char.transform'/>
+    <svg :height='state.svgHeight' :width='state.svgWidth'>
+        <g v-for='(line,idx) of state.renderContent' :key='line.id'
+            :transform='lineTransform(idx)'>
+            <path
+                v-for='char of line.content'
+                :key='char.id'
+                :fill-rule='char.fillRule'
+                :d='char.path'
+                :transform='char.transform'/>
+        </g>
     </svg>
 </template>
 <script setup>
-import { inject, computed, defineProps, reactive, watch, onMounted, nextTick } from 'vue';
+import { inject, computed, defineProps, reactive } from 'vue';
 import linefold from 'linefold';
 import {Glyph} from './font';
 const store=inject('store');
@@ -27,30 +30,49 @@ const props=defineProps({
   align:String
 });
 const state=reactive({
-    svgWidth:0,
-    svgHeight:0,
-    charList:[]
+    textFolded:computed(()=>{
+        return linefold(props.text,props.maxWidth+props.charSpacing,(text)=>measureText(
+            text,
+            props.fontSize,
+            props.ascFont,
+            props.hzkFont,
+            props.charSpacing
+        ));
+    }),
+    lineWidthArr:computed(()=>{
+        return state.textFolded.map(line=>{
+            return measureText(
+                line,
+                props.fontSize,
+                props.ascFont,
+                props.hzkFont,
+                props.charSpacing
+            )-props.charSpacing;
+        });
+    }),
+    svgWidth:computed(()=>{
+        if(!state.lineWidthArr.length){
+            return 0;
+        }
+        return Math.max.apply(null,state.lineWidthArr);
+    }),
+    svgHeight:computed(()=>{
+        let lines=state.textFolded.length;
+        return lines*props.fontSize+(lines-1)*props.lineSpacing;
+    }),
+    renderContent:computed(()=>{
+        let result=[];
+        for(let line of state.textFolded){
+            result.push({
+                id:Math.random(),
+                content:renderText(line)
+            });
+        }
+        return result;
+    })
 });
-const updateSignal=computed(()=>{
-    return [
-        props.maxWidth,
-        props.text,
-        props.fontSize,
-        props.ascFont,
-        props.hzkFont,
-        props.charSpacing,
-        props.lineSpacing,
-        props.align
-    ];
-});
-let glyphCache={};
 const getGlyph=(char,ascFont,hzkFont)=>{
-    glyphCache={};
-    let glyph=glyphCache[char];
-    if(!glyph){
-        glyph=glyphCache[char]=store.fontManager.getGlyph(char,ascFont,hzkFont);
-    }
-    return glyph;
+    return store.fontManager.getGlyph(char,ascFont,hzkFont);
 }
 const measureText=(text,fontSize,ascFont,hzkFont,charSpacing=0)=>{
     let x=0;
@@ -64,7 +86,23 @@ const measureText=(text,fontSize,ascFont,hzkFont,charSpacing=0)=>{
     }
     return x;
 }
-const renderText=(text,x,y)=>{
+const lineTransform=(idx)=>{
+    let xPos=0;
+    let yPos=idx*(props.fontSize+props.lineSpacing);
+    switch(props.align){
+        case 'left':
+            xPos=0;
+        break;
+        case 'center':
+            xPos=Math.abs(state.svgWidth-state.lineWidthArr[idx])/2;
+        break;
+        case 'right':
+            xPos=Math.abs(state.svgWidth-state.lineWidthArr[idx]);
+        break;
+    }
+    return `translate(${xPos},${yPos})`;
+}
+const renderText=(text,x=0,y=0)=>{
     let xPos=x, result=[];
     let scale=props.fontSize/Glyph.BASE_HEIGHT;
     for(let char of text){
@@ -81,7 +119,7 @@ const renderText=(text,x,y)=>{
                 fillRule='evenodd';
                 translateY+=10*scale;
             };
-            state.charList.push({
+            result.push({
                 id:Math.random(),
                 fillRule,
                 path:glyph.toSVG(),
@@ -92,53 +130,4 @@ const renderText=(text,x,y)=>{
     }
     return result;
 }
-const updateText=async()=>{
-    glyphCache={};
-    state.charList=[];
-    await nextTick();
-    let textFolded=linefold(props.text,props.maxWidth+props.charSpacing,(text)=>{
-        return measureText(
-            text,
-            props.fontSize,
-            props.ascFont,
-            props.hzkFont,
-            props.charSpacing
-        );
-    });
-    let lineWidthArr=textFolded.map(line=>{
-        return measureText(
-            line,
-            props.fontSize,
-            props.ascFont,
-            props.hzkFont,
-            props.charSpacing
-        )-props.charSpacing;
-    });
-    state.svgWidth=Math.max.apply(null,lineWidthArr);
-    state.svgHeight=(props.lineSpacing*(textFolded.length-1)+props.fontSize*textFolded.length);
-    
-    textFolded.forEach((line,idx)=>{
-        let xPos=0;
-        switch(props.align){
-            case 'left':
-                xPos=0;
-            break;
-            case 'center':
-                xPos=Math.abs(state.svgWidth-lineWidthArr[idx])/2;
-            break;
-            case 'right':
-                xPos=Math.abs(state.svgWidth-lineWidthArr[idx]);
-            break;
-        }
-        state.charList=state.charList.concat(renderText(
-            line,
-            xPos,
-            idx*(props.lineSpacing+props.fontSize)
-        ));
-    });
-}
-watch(updateSignal,updateText);
-updateText();
-onMounted(()=>{
-});
 </script>

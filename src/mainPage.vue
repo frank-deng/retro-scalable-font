@@ -19,6 +19,9 @@
         <el-form-item label='字体大小'>
             <el-input-number v-model="state.fontSize" :min="8"></el-input-number>
         </el-form-item>
+        <el-form-item label='容器宽度'>
+            <el-input-number v-model="state.maxWidth" :min="160"></el-input-number>
+        </el-form-item>
         <el-form-item label='字符间距'>
             <el-input-number v-model="state.charSpacing" :min="-50" :max="50"></el-input-number>
         </el-form-item>
@@ -32,17 +35,19 @@
                 <el-radio-button label='right'>右对齐</el-radio-button>
             </el-radio-group>
         </el-form-item>
-        <displayText
-            class='displayText'
-            v-if='state.inputText'
-            :text='state.inputText'
-            :maxWidth='state.screenWidth'
-            :fontSize='state.fontSize'
-            :ascFont='state.ascFont'
-            :hzkFont='state.hzkFont'
-            :charSpacing='state.charSpacing'
-            :lineSpacing='state.lineSpacing'
-            :align='state.align'></displayText>
+        <div class='displayTextContainer'>
+            <displayText
+                class='displayText'
+                v-if='state.inputText'
+                :text='state.inputText'
+                :maxWidth='state.maxWidth'
+                :fontSize='state.fontSize'
+                :ascFont='state.ascFont'
+                :hzkFont='state.hzkFont'
+                :charSpacing='state.charSpacing'
+                :lineSpacing='state.lineSpacing'
+                :align='state.align'></displayText>
+        </div>
     </el-form>
 </template>
 <script setup>
@@ -58,15 +63,8 @@ const state=reactive({
     hzkFont:'HZKPSSTJ',
     charSpacing:0,
     lineSpacing:0,
-    screenWidth:document.body.offsetWidth,
+    maxWidth:640,
     align:'left'
-});
-const resizeHandler=()=>{
-    state.screenWidth=document.body.offsetWidth;
-}
-window.addEventListener('resize',resizeHandler);
-onUnmounted(()=>{
-    window.removeEventListener('resize',resizeHandler);
 });
 </script>
 <style lang="less" scoped>
@@ -86,8 +84,13 @@ onUnmounted(()=>{
         width:110px;
     }
 }
-.displayText{
-    display:block;
-    margin:10px auto;
+.displayTextContainer{
+    overflow:auto;
+    margin:10px;
+    .displayText{
+        display:inline-block;
+        vertical-align: top;
+        border:1px solid #DCDFE6;
+    }
 }
 </style>
