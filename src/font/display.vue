@@ -117,7 +117,6 @@ const updateText=async()=>{
         width=Math.max(width,lineWidth);
         state.charList=state.charList.concat(renderText(line,0,yPos));
         yPos+=props.lineSpacing+props.fontSize;
-        console.log('yPos',yPos);
     }
     state.svgWidth=width;
     state.svgHeight=yPos-props.lineSpacing;
