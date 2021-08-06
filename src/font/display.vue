@@ -105,21 +105,37 @@ const updateText=async()=>{
             props.charSpacing
         );
     });
-    let yPos=0,width=0;
-    for(let line of textFolded){
-        let lineWidth=measureText(
+    let lineWidthArr=textFolded.map(line=>{
+        return measureText(
             line,
             props.fontSize,
             props.ascFont,
             props.hzkFont,
             props.charSpacing
         )-props.charSpacing;
-        width=Math.max(width,lineWidth);
-        state.charList=state.charList.concat(renderText(line,0,yPos));
-        yPos+=props.lineSpacing+props.fontSize;
-    }
-    state.svgWidth=width;
-    state.svgHeight=yPos-props.lineSpacing;
+    });
+    state.svgWidth=Math.max.apply(null,lineWidthArr);
+    state.svgHeight=(props.lineSpacing*(textFolded.length-1)+props.fontSize*textFolded.length);
+    
+    textFolded.forEach((line,idx)=>{
+        let xPos=0;
+        switch(props.align){
+            case 'left':
+                xPos=0;
+            break;
+            case 'center':
+                xPos=Math.abs(state.svgWidth-lineWidthArr[idx])/2;
+            break;
+            case 'right':
+                xPos=Math.abs(state.svgWidth-lineWidthArr[idx]);
+            break;
+        }
+        state.charList=state.charList.concat(renderText(
+            line,
+            xPos,
+            idx*(props.lineSpacing+props.fontSize)
+        ));
+    });
 }
 watch(updateSignal,updateText);
 updateText();

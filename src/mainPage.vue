@@ -25,6 +25,13 @@
         <el-form-item label='行间距'>
             <el-input-number v-model="state.lineSpacing" :min="-50" :max="50"></el-input-number>
         </el-form-item>
+        <el-form-item label='对齐方式'>
+            <el-radio-group v-model="state.align">
+                <el-radio-button label='left'>左对齐</el-radio-button>
+                <el-radio-button label='center'>居中</el-radio-button>
+                <el-radio-button label='right'>右对齐</el-radio-button>
+            </el-radio-group>
+        </el-form-item>
         <displayText
             class='displayText'
             v-if='state.inputText'
@@ -52,7 +59,7 @@ const state=reactive({
     charSpacing:0,
     lineSpacing:0,
     screenWidth:document.body.offsetWidth,
-    align:'center'
+    align:'left'
 });
 const resizeHandler=()=>{
     state.screenWidth=document.body.offsetWidth;
