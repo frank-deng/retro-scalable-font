@@ -1,5 +1,5 @@
 <template>
-    <svg :height='state.svgHeight' :width='state.svgWidth'>
+    <svg :height='state.svgHeight' :width='state.svgWidth' :style='{fill:props.color}'>
         <g v-for='(line,idx) of state.renderContent' :key='line.id'
             :transform='lineTransform(idx)'>
             <path
@@ -17,17 +17,36 @@ import linefold from 'linefold';
 import {Glyph} from './font';
 const store=inject('store');
 const props=defineProps({
-  maxWidth:Number,
-  text:String,
-  fontSize:Number,
-  ascFont:Number,
-  hzkFont:String,
-  charSpacing:{
-      type:Number,
-      default:0
-  },
-  lineSpacing:Number,
-  align:String
+    maxWidth:{
+        type:Number,
+        default:640
+    },
+    text:String,
+    fontSize:{
+        type:Number,
+        default:24
+    },
+    ascFont:{
+        type:Number,
+        default:0
+    },
+    hzkFont:{
+        type:String,
+        default:'HZKPSSTJ'
+    },
+    charSpacing:{
+        type:Number,
+        default:0
+    },
+    lineSpacing:{
+        type:Number,
+        default:0
+    },
+    align:{
+        type:String,
+        default:'left'
+    },
+    color:String
 });
 const state=reactive({
     textFolded:computed(()=>{

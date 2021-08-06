@@ -22,6 +22,9 @@
         <el-form-item label='容器宽度'>
             <el-input-number v-model="state.maxWidth" :min="160"></el-input-number>
         </el-form-item>
+        <el-form-item label='颜色'>
+            <el-color-picker v-model="state.color"/>
+        </el-form-item>
         <el-form-item label='字符间距'>
             <el-input-number v-model="state.charSpacing" :min="-50" :max="50"></el-input-number>
         </el-form-item>
@@ -35,9 +38,13 @@
                 <el-radio-button label='right'>右对齐</el-radio-button>
             </el-radio-group>
         </el-form-item>
+        <el-form-item label-width="">
+            <el-button type='primary' @click='saveSVG'>保存SVG</el-button>
+        </el-form-item>
         <div class='displayTextContainer'>
             <displayText
                 class='displayText'
+                ref='container'
                 v-if='state.inputText'
                 :text='state.inputText'
                 :maxWidth='state.maxWidth'
@@ -46,13 +53,15 @@
                 :hzkFont='state.hzkFont'
                 :charSpacing='state.charSpacing'
                 :lineSpacing='state.lineSpacing'
-                :align='state.align'></displayText>
+                :align='state.align'
+                :color='state.color'></displayText>
         </div>
     </el-form>
 </template>
 <script setup>
-import {inject, onUnmounted, reactive} from 'vue';
+import {inject, ref, reactive} from 'vue';
 import displayText from '/@/font/display.vue';
+import {saveAs} from 'file-saver';
 const store=inject('store');
 const state=reactive({
     inputText:'',
@@ -64,8 +73,14 @@ const state=reactive({
     charSpacing:0,
     lineSpacing:0,
     maxWidth:640,
-    align:'left'
+    align:'left',
+    color:'#303133'
 });
+const container=ref(null);
+const saveSVG=()=>{
+    console.log(container.value.$el.outerHTML);
+    saveAs(new Blob([container.value.$el.outerHTML]),'export.svg');
+}
 </script>
 <style lang="less" scoped>
 .el-form-item{
