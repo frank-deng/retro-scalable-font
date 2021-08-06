@@ -23,6 +23,7 @@ function getNum6Pair(data,offset){
     return [s0 ? -n0 : n0, s1 ? -n1 : n1];
 }
 export class Font{
+    __cache={};
     constructor(fontData,fontName=null){
         if (Font==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
@@ -212,11 +213,16 @@ export class Font{
         return path;
     }
     getGlyph(idx){
+        if(this.__cache[idx]){
+            return this.__cache[idx];
+        }
         let glyphData=this.__getGlyphData(idx);
         if(!glyphData || !glyphData.length){
             return new Path();
         }
-        return this.__processGlyphData(glyphData);
+        let path=this.__processGlyphData(glyphData);
+        this.__cache[idx]=path;
+        return path;
     }
 }
 export class Glyph extends Path{

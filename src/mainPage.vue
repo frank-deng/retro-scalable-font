@@ -1,6 +1,8 @@
 <template>
     <div class='mainPage'>
-        <el-input type='textarea' v-model='state.inputText'/>
+        <el-input type='textarea' v-model='state.inputText'
+            resize='none'
+            :autosize='{minRows:3,maxRows:20}'/>
         <el-input-number v-model="state.fontSize" :min="8"></el-input-number>
         <el-select v-model='state.ascFont'>
             <el-option v-for='item of state.ascFontList' :key='item.value' :value='item.value' :label='item.label'></el-option>
@@ -10,16 +12,17 @@
         </el-select>
         <el-input-number v-model="state.charSpacing" :min="-50" :max="50"></el-input-number>
         <el-input-number v-model="state.lineSpacing" :min="-50" :max="50"></el-input-number>
-        <p>
-            <displayText
-                :text='state.inputText'
-                :maxWidth='state.screenWidth'
-                :fontSize='state.fontSize'
-                :ascFont='state.ascFont'
-                :hzkFont='state.hzkFont'
-                :charSpacing='state.charSpacing'
-                :lineSpacing='state.lineSpacing'></displayText>
-        </p>
+        <displayText
+            class='displayText'
+            v-if='state.inputText'
+            :text='state.inputText'
+            :maxWidth='state.screenWidth'
+            :fontSize='state.fontSize'
+            :ascFont='state.ascFont'
+            :hzkFont='state.hzkFont'
+            :charSpacing='state.charSpacing'
+            :lineSpacing='state.lineSpacing'
+            :align='state.align'></displayText>
     </div>
 </template>
 <script setup>
@@ -35,7 +38,8 @@ const state=reactive({
     hzkFont:'HZKPSSTJ',
     charSpacing:0,
     lineSpacing:0,
-    screenWidth:document.body.offsetWidth
+    screenWidth:document.body.offsetWidth,
+    align:'center'
 });
 const resizeHandler=()=>{
     console.log('screenwidth',document.body.offsetWidth);
@@ -47,7 +51,8 @@ onUnmounted(()=>{
 });
 </script>
 <style lang="less" scoped>
-.charDisp{
-    //border: 1px solid #000000;
+.displayText{
+    display:block;
+    margin:10px auto;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <svg :height='state.svgHeight' :width='Math.min(state.svgWidth,props.maxWidth)' v-if='props.text'>
+    <svg :height='state.svgHeight' :width='Math.min(state.svgWidth,props.maxWidth)'>
         <path
             v-for='char of state.charList'
             :key='char.id'
@@ -9,7 +9,8 @@
     </svg>
 </template>
 <script setup>
-import { inject, computed, defineProps, reactive, watch, onMounted } from 'vue';
+import { inject, computed, defineProps, reactive, watch, onMounted, nextTick } from 'vue';
+import linefold from 'linefold';
 import {Glyph} from './font';
 const store=inject('store');
 const props=defineProps({
@@ -18,13 +19,17 @@ const props=defineProps({
   fontSize:Number,
   ascFont:Number,
   hzkFont:String,
-  charSpacing:Number,
-  lineSpacing:Number
+  charSpacing:{
+      type:Number,
+      default:0
+  },
+  lineSpacing:Number,
+  align:String
 });
 const state=reactive({
     svgWidth:0,
     svgHeight:0,
-    textList:[]
+    charList:[]
 });
 const updateSignal=computed(()=>{
     return [
@@ -34,11 +39,13 @@ const updateSignal=computed(()=>{
         props.ascFont,
         props.hzkFont,
         props.charSpacing,
-        props.lineSpacing
+        props.lineSpacing,
+        props.align
     ];
 });
 let glyphCache={};
 const getGlyph=(char,ascFont,hzkFont)=>{
+    glyphCache={};
     let glyph=glyphCache[char];
     if(!glyph){
         glyph=glyphCache[char]=store.fontManager.getGlyph(char,ascFont,hzkFont);
@@ -50,27 +57,24 @@ const measureText=(text,fontSize,ascFont,hzkFont,charSpacing=0)=>{
     let scale=fontSize/Glyph.BASE_HEIGHT;
     for(let char of text){
         let glyph=getGlyph(char,ascFont,hzkFont);
+        if(!glyph){
+            continue;
+        }
         x+=glyph.getWidth()*scale+charSpacing;
     }
     return x;
 }
-const updateText=()=>{
-    let xPos=0,xMax=0,lines=1;
-    glyphCache={};
-    state.charList=[];
+const renderText=(text,x,y)=>{
+    let xPos=x, result=[];
     let scale=props.fontSize/Glyph.BASE_HEIGHT;
-    for(let char of props.text){
-        if('\n'==char){
-            //换行处理
-            lines++;
-            xMax=Math.max(xMax,xPos);
-            xPos=0;
+    for(let char of text){
+        let glyph=getGlyph(char,props.ascFont,props.hzkFont);
+        if(!glyph){
             continue;
         }
-        let glyph=getGlyph(char,props.ascFont,props.hzkFont);
         if(!glyph.isEmpty()){
             let charScale=scale,
-                translateY=(lines-1)*(props.fontSize+props.lineSpacing),
+                translateY=y,
                 fillRule='nonzero';
             if(glyph.isAscii()){
                 charScale=scale*1.2;
@@ -86,12 +90,40 @@ const updateText=()=>{
         }
         xPos+=glyph.getWidth()*scale+(props.charSpacing||0);
     }
-    xMax=Math.max(xMax,xPos);
-    state.svgWidth=xMax-props.charSpacing;
-    state.svgHeight=props.fontSize*lines+props.lineSpacing*(lines-1);
+    return result;
+}
+const updateText=async()=>{
+    glyphCache={};
+    state.charList=[];
+    await nextTick();
+    let textFolded=linefold(props.text,props.maxWidth+props.charSpacing,(text)=>{
+        return measureText(
+            text,
+            props.fontSize,
+            props.ascFont,
+            props.hzkFont,
+            props.charSpacing
+        );
+    });
+    let yPos=0,width=0;
+    for(let line of textFolded){
+        let lineWidth=measureText(
+            line,
+            props.fontSize,
+            props.ascFont,
+            props.hzkFont,
+            props.charSpacing
+        )-props.charSpacing;
+        width=Math.max(width,lineWidth);
+        state.charList=state.charList.concat(renderText(line,0,yPos));
+        yPos+=props.lineSpacing+props.fontSize;
+        console.log('yPos',yPos);
+    }
+    state.svgWidth=width;
+    state.svgHeight=yPos-props.lineSpacing;
 }
 watch(updateSignal,updateText);
+updateText();
 onMounted(()=>{
-    updateText();
 });
 </script>
