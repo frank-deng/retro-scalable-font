@@ -237,6 +237,8 @@ export class Glyph extends Path{
     getWidth(){
         if(!this.isAscii()){
             return Glyph.BASE_HEIGHT;
+        }else if(this.isEmpty()){
+            return Math.round(Glyph.ASCII_BASE_HEIGHT/2);
         }else{
             return this.getBoundingRect().x1*1.21;
         }

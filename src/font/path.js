@@ -349,11 +349,20 @@ export class Path{
         });
     }
     getBoundingRect(){
+        if(this.isEmpty()){
+            return null;
+        }
         return {
             ...this.__bbox
         };
     }
+    isEmpty(){
+        return !this.__strokeList.length;
+    }
     toSVG(){
+        if(this.isEmpty()){
+            return null;
+        }
         return this.__strokeList.map(item=>item.toSVG()).join(' ')+' Z';
     }
 }
