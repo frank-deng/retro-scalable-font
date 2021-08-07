@@ -259,11 +259,12 @@ export class FontASC extends Font{
     }
 }
 export class FontHZK extends Font{
-    constructor(fontData){
+    constructor(fontData,isSymbol=false){
         super(fontData);
+        this.__isSymbol=isSymbol;
     }
-    getGlyph(qu,wei,isSymbol=false){
-        return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);
+    getGlyph(qu,wei){
+        return new Glyph(super.getGlyph((this.__isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);
     }
 }
 export class FontGBK extends Font{
@@ -271,13 +272,21 @@ export class FontGBK extends Font{
         super(fontData);
     }
     getGlyph(qu,wei){
-        console.log(qu.toString(16),wei.toString(16));
         let offset=0;
-        if(qu>=0xa1 && wei>=0xa1){
+        if(wei<0x7f){
+            offset=0x2e44+(qu-0x81)*96+(wei-0x40);
+        }else if(wei<0xa1){
+            offset=0x2e44+(qu-0x81)*96+(wei-0x41);
+        }else if(qu<0xa1){
+            offset=0x2284+(qu-0x81)*94+(wei-0xa1);
+        }else{
             offset=(qu-0xa1)*94+(wei-0xa1);
-        }else if(qu>=0xa1 && wei<0xa1){
-            offset=(qu-0xa0)*95+(wei-0xa1);
         }
-        return new Glyph(super.getGlyph(offset),false);
+        try{
+            return new Glyph(super.getGlyph(offset),false);
+        }catch(e){
+            console.error(e);
+        }
+        return null;
     }
 }

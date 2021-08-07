@@ -14,7 +14,7 @@ export class FontManager{
                 this.__ascFontList=font.fontNames.slice();
                 continue;
             }else if('HZKPST'==font.file){
-                this.__hzkSymbolFont=new FontHZK(font.data);
+                this.__hzkSymbolFont=new FontHZK(font.data,true);
                 continue;
             }else{
                 this.__hzkFont[font.file]=/.GBK$/i.test(font.file) ? new FontGBK(font.data) : new FontHZK(font.data);
@@ -78,7 +78,7 @@ export class FontManager{
         }
         //符号字库使用
         if(qu<0xb0){
-            return this.__hzkSymbolFont.getGlyph(qu,wei,true);
+            return this.__hzkSymbolFont.getGlyph(qu,wei);
         }
         //汉字字库使用
         return hzkFontInstance.getGlyph(qu,wei);

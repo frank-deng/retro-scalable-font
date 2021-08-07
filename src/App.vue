@@ -5,7 +5,6 @@
 import {ElLoading,ElMessageBox} from 'element-plus';
 import {provide,reactive} from 'vue';
 import {initFontManager} from '/@/font';
-import mainPage from '/@/mainPage.vue';
 
 const store=reactive({
   fontLoading:true
