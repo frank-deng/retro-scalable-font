@@ -90,9 +90,9 @@ export async function initFontManager(){
             };
         }catch(e){
             if(font.required){
-                throw new Error(`Failed to load required font ${font.name}`,e);
+                throw new Error(`Failed to load required font ${font.name||font.file}`,e);
             }
-            console.warn(`Failed to load font ${font.name}`,e);
+            console.warn(`Failed to load font ${font.name||font.file}`,e);
         }
         return null;
     }));

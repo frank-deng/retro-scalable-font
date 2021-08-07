@@ -1,5 +1,5 @@
 <template>
-  <mainPage v-if='!store.fontLoading'></mainPage>
+  <router-view v-if='!store.fontLoading'></router-view>
 </template>
 <script setup>
 import {ElLoading,ElMessageBox} from 'element-plus';
