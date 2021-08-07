@@ -266,3 +266,18 @@ export class FontHZK extends Font{
         return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);
     }
 }
+export class FontGBK extends Font{
+    constructor(fontData){
+        super(fontData);
+    }
+    getGlyph(qu,wei){
+        console.log(qu.toString(16),wei.toString(16));
+        let offset=0;
+        if(qu>=0xa1 && wei>=0xa1){
+            offset=(qu-0xa1)*94+(wei-0xa1);
+        }else if(qu>=0xa1 && wei<0xa1){
+            offset=(qu-0xa0)*95+(wei-0xa1);
+        }
+        return new Glyph(super.getGlyph(offset),false);
+    }
+}

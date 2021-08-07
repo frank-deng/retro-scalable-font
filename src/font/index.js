@@ -1,6 +1,6 @@
 import fontInfo from './fontInfo.json';
 import iconv from 'iconv-lite';
-import { FontASC, FontHZK } from './font';
+import { FontASC, FontHZK, FontGBK } from './font';
 
 export class FontManager{
     __hzkFont={};
@@ -17,7 +17,7 @@ export class FontManager{
                 this.__hzkSymbolFont=new FontHZK(font.data);
                 continue;
             }else{
-                this.__hzkFont[font.file]=new FontHZK(font.data);
+                this.__hzkFont[font.file]=/.GBK$/i.test(font.file) ? new FontGBK(font.data) : new FontHZK(font.data);
                 this.__hzkFontList.push({
                     label:font.name,
                     value:font.file
@@ -58,11 +58,19 @@ export class FontManager{
             return this.__ascFont.getGlyph(code-0x20,ascFont);
         }
         //作为中文字符处理
-        let iconvBuf=iconv.encode(char,'GB2312');
+        let iconvBuf=iconv.encode(char,'GBK');
+        let hzkFontInstance=this.__hzkFont[hzkFont];
+
         //当前字符无法表示为GB2312或GBK
         if(2!=iconvBuf.length){
             return null;
         }
+        
+        //GBK字体使用
+        if (hzkFontInstance instanceof FontGBK){
+            return hzkFontInstance.getGlyph(iconvBuf[0],iconvBuf[1]);
+        }
+
         //当前字符在GBK范围内但不在GB2312范围内
         let qu=iconvBuf[0], wei=iconvBuf[1];
         if(qu<0xa1 || (qu>0xa9 && qu<0xb0) || wei<0xa1 || wei>0xfe){
@@ -73,7 +81,7 @@ export class FontManager{
             return this.__hzkSymbolFont.getGlyph(qu,wei,true);
         }
         //汉字字库使用
-        return this.__hzkFont[hzkFont].getGlyph(qu,wei);
+        return hzkFontInstance.getGlyph(qu,wei);
     }
 }
 
