@@ -1,5 +1,6 @@
 <template>
-    <el-form size='mini' label-position='right' label-width="80px" inline>
+    <el-form size='mini' label-position='right' label-width="80px" inline
+        class='mainPage'>
         <el-form-item label='内容' class='formItemInputText'>
             <el-input type='textarea' v-model='state.inputText'
                 resize='none'
@@ -23,7 +24,7 @@
             <el-input-number v-model="state.maxWidth" :min="160"></el-input-number>
         </el-form-item>
         <el-form-item label='颜色'>
-            <el-color-picker v-model="state.color"/>
+            <el-color-picker v-model="state.color"></el-color-picker>
         </el-form-item>
         <el-form-item label='字符间距'>
             <el-input-number v-model="state.charSpacing" :min="-50" :max="50"></el-input-number>
@@ -39,6 +40,7 @@
             </el-radio-group>
         </el-form-item>
         <el-form-item label-width="">
+            <el-button @click='resetParam'>复位</el-button>
             <el-button type='primary' @click='saveSVG'>保存SVG</el-button>
         </el-form-item>
         <div class='displayTextContainer'>
@@ -59,15 +61,15 @@
     </el-form>
 </template>
 <script setup>
-import {inject, ref, reactive} from 'vue';
+const LOCAL_STORAGE_KEY='UCDOS_OUTLINE_FONT_SVG_PARAMS';
+import {inject, ref, reactive, watch} from 'vue';
 import displayText from '/@/font/display.vue';
 import {saveAs} from 'file-saver';
 const store=inject('store');
-const state=reactive({
+
+const defaultValue={
     inputText:'',
     fontSize:24,
-    ascFontList:store.fontManager.getAscFontList(),
-    hzkFontList:store.fontManager.getHzkFontList(),
     ascFont:0,
     hzkFont:store.fontManager.getHzkFontList()[0].value,
     charSpacing:0,
@@ -75,13 +77,51 @@ const state=reactive({
     maxWidth:640,
     align:'left',
     color:'#303133'
+};
+let storedValue={};
+try{
+    let dataRaw=localStorage.getItem(LOCAL_STORAGE_KEY);
+    if(dataRaw){
+        storedValue=JSON.parse(dataRaw);
+    }
+}catch(e){
+    console.error(e);
+}
+const state=reactive({
+    ...defaultValue,
+    ...storedValue,
+    ascFontList:store.fontManager.getAscFontList(),
+    hzkFontList:store.fontManager.getHzkFontList()
 });
+watch(state,()=>{
+    let saveData={
+        ...state
+    };
+    delete saveData.ascFontList;
+    delete saveData.hzkFontList;
+    localStorage.setItem(LOCAL_STORAGE_KEY,JSON.stringify(saveData));
+});
+
 const container=ref(null);
+const resetParam=()=>{
+    Object.assign(state,defaultValue);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+}
 const saveSVG=()=>{
-    console.log(container.value.$el.outerHTML);
-    saveAs(new Blob([container.value.$el.outerHTML]),'export.svg');
+    let el=container.value.$el;
+    let svgText=`<?xml version="1.0" encoding="utf-8"?>\n${container.value.$el.outerHTML}`;
+    saveAs(new Blob([svgText]),'export.svg');
 }
 </script>
+<style lang="less">
+.mainPage{
+    .el-form-item{
+        .el-color-picker{
+            vertical-align: top;
+        }
+    }
+}
+</style>
 <style lang="less" scoped>
 .el-form-item{
     &.el-form-item--mini {
@@ -91,6 +131,9 @@ const saveSVG=()=>{
     &.formItemInputText{
         width:100%;
         margin-right:0;
+    }
+    .el-color-picker{
+        vertical-align: top;
     }
     .el-select{
         width:130px;

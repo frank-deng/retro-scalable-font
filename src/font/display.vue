@@ -1,5 +1,12 @@
 <template>
-    <svg :height='state.svgHeight' :width='state.svgWidth' :style='{fill:props.color}'>
+    <svg
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        :height='state.svgHeight'
+        :width='state.svgWidth'
+        :style='{fill:props.color}'
+        v-if='state.renderContent.length'>
         <g v-for='(line,idx) of state.renderContent' :key='line.id'
             :transform='lineTransform(idx)'>
             <path
@@ -81,11 +88,15 @@ const state=reactive({
     }),
     renderContent:computed(()=>{
         let result=[];
-        for(let line of state.textFolded){
-            result.push({
-                id:Math.random(),
-                content:renderText(line)
-            });
+        try{
+            for(let line of state.textFolded){
+                result.push({
+                    id:Math.random(),
+                    content:renderText(line)
+                });
+            }
+        }catch(e){
+            console.error(e);
         }
         return result;
     })
