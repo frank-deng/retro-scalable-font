@@ -69,7 +69,7 @@ const state=reactive({
     ascFontList:store.fontManager.getAscFontList(),
     hzkFontList:store.fontManager.getHzkFontList(),
     ascFont:0,
-    hzkFont:'HZKPSSTJ',
+    hzkFont:store.fontManager.getHzkFontList()[0].value,
     charSpacing:0,
     lineSpacing:0,
     maxWidth:640,

@@ -24,16 +24,12 @@ function getNum6Pair(data,offset){
 }
 export class Font{
     __cache={};
-    constructor(fontData,fontName=null){
+    constructor(fontData){
         if (Font==this.constructor) {
             throw new Error("Abstract classes can't be instantiated.");
         }
         this.__arrayBuffer=fontData;
         this.__dataView=new DataView(this.__arrayBuffer);
-        this.__fontName=fontName;
-    }
-    getFontName(){
-        return this.__fontName;
     }
     __getGlyphData(idx){
         let dataView=this.__dataView, offset=idx*6;
@@ -251,12 +247,8 @@ export class Glyph extends Path{
     }
 }
 export class FontASC extends Font{
-    constructor(fontData,fontNames){
+    constructor(fontData){
         super(fontData);
-        this.__fontNames=fontNames;
-    }
-    getFontNames(){
-        return this.__fontNames;
     }
     getGlyph(charIdx,fontIdx=0){
         //处理英文空格
@@ -267,8 +259,8 @@ export class FontASC extends Font{
     }
 }
 export class FontHZK extends Font{
-    constructor(fontData,fontName){
-        super(fontData,fontName);
+    constructor(fontData){
+        super(fontData);
     }
     getGlyph(qu,wei,isSymbol=false){
         return new Glyph(super.getGlyph((isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);

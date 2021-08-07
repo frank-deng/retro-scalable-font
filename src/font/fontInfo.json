@@ -1,6 +1,7 @@
-{
-    "ASCPS":{
-        "type":"ascii",
+[
+    {
+        "file":"ASCPS",
+        "required":true,
         "fontNames":[
             "Roman",
             "Roman Italic",
@@ -14,142 +15,128 @@
             "Bodoni"
         ]
     },
-    "HZKPST":{
-        "type":"fuhao"
+    {
+        "file":"HZKPST",
+        "required":true
     },
-    "HZKPSDHF":{
-        "type":"hanzi",
-        "name":"大黑繁",
-        "traditionalChinese":true
-    },
-    "HZKPSDHJ":{
-        "type":"hanzi",
-        "name":"大黑简",
-        "traditionalChinese":false
-    },
-    "HZKPSFSF":{
-        "type":"hanzi",
-        "name":"仿宋繁",
-        "traditionalChinese":true
-    },
-    "HZKPSFSJ":{
-        "type":"hanzi",
-        "name":"仿宋简",
-        "traditionalChinese":false
-    },
-    "HZKPSHPF":{
-        "type":"hanzi",
-        "name":"琥珀繁",
-        "traditionalChinese":true
-    },
-    "HZKPSHTF":{
-        "type":"hanzi",
-        "name":"黑体繁",
-        "traditionalChinese":true
-    },
-    "HZKPSHTJ":{
-        "type":"hanzi",
-        "name":"黑体简",
-        "traditionalChinese":false
-    },
-    "HZKPSKTF":{
-        "type":"hanzi",
-        "name":"楷体繁",
-        "traditionalChinese":true
-    },
-    "HZKPSKTJ":{
-        "type":"hanzi",
-        "name":"楷体简",
-        "traditionalChinese":false
-    },
-    "HZKPSLBF":{
-        "type":"hanzi",
-        "name":"隶变繁",
-        "traditionalChinese":true
-    },
-    "HZKPSLBJ":{
-        "type":"hanzi",
-        "name":"隶变简",
-        "traditionalChinese":false
-    },
-    "HZKPSLSJ":{
-        "type":"hanzi",
-        "name":"隶书简",
-        "traditionalChinese":false
-    },
-    "HZKPSMHJ":{
-        "type":"hanzi",
-        "name":"美黑简",
-        "traditionalChinese":false
-    },
-    "HZKPSSTF":{
-        "type":"hanzi",
-        "name":"宋体繁",
-        "traditionalChinese":true
-    },
-    "HZKPSSTJ":{
-        "type":"hanzi",
+    {
+        "file":"HZKPSSTJ",
         "name":"宋体简",
-        "traditionalChinese":false
+        "required":true
     },
-    "HZKPSWBF":{
-        "type":"hanzi",
-        "name":"魏碑繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSFSJ",
+        "name":"仿宋简",
+        "required":true
     },
-    "HZKPSWBJ":{
-        "type":"hanzi",
-        "name":"魏碑简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSKTJ",
+        "name":"楷体简",
+        "required":true
     },
-    "HZKPSXBF":{
-        "type":"hanzi",
-        "name":"报宋繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSHTJ",
+        "name":"黑体简",
+        "required":true
     },
-    "HZKPSXBJ":{
-        "type":"hanzi",
-        "name":"报宋简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSBSJ",
+        "name":"标宋简"
     },
-    "HZKPSXKF":{
-        "type":"hanzi",
-        "name":"行楷繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSY1J",
+        "name":"细圆简"
     },
-    "HZKPSXKJ":{
-        "type":"hanzi",
-        "name":"行楷简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSY3J",
+        "name":"准圆简"
     },
-    "HZKPSY1F":{
-        "type":"hanzi",
-        "name":"细圆繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSLBJ",
+        "name":"隶变简"
     },
-    "HZKPSY1J":{
-        "type":"hanzi",
-        "name":"细圆简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSDHJ",
+        "name":"大黑简"
     },
-    "HZKPSY3F":{
-        "type":"hanzi",
-        "name":"准圆繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSWBJ",
+        "name":"魏碑简"
     },
-    "HZKPSY3J":{
-        "type":"hanzi",
-        "name":"准圆简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSXKJ",
+        "name":"行楷简"
     },
-    "HZKPSYTJ":{
-        "type":"hanzi",
-        "name":"姚体简",
-        "traditionalChinese":false
+    {
+        "file":"HZKPSLSJ",
+        "name":"隶书简"
     },
-    "HZKPSZYF":{
-        "type":"hanzi",
-        "name":"综艺繁",
-        "traditionalChinese":true
+    {
+        "file":"HZKPSYTJ",
+        "name":"姚体简"
+    },
+    {
+        "file":"HZKPSMHJ",
+        "name":"美黑简"
+    },
+    {
+        "file":"HZKPSSTF",
+        "name":"宋体繁"
+    },
+    {
+        "file":"HZKPSFSF",
+        "name":"仿宋繁"
+    },
+    {
+        "file":"HZKPSKTF",
+        "name":"楷体繁"
+    },
+    {
+        "file":"HZKPSHTF",
+        "name":"黑体繁"
+    },
+    {
+        "file":"HZKPSY1F",
+        "name":"细圆繁"
+    },
+    {
+        "file":"HZKPSY3F",
+        "name":"准圆繁"
+    },
+    {
+        "file":"HZKPSLBF",
+        "name":"隶变繁"
+    },
+    {
+        "file":"HZKPSDHF",
+        "name":"大黑繁"
+    },
+    {
+        "file":"HZKPSWBF",
+        "name":"魏碑繁"
+    },
+    {
+        "file":"HZKPSXKF",
+        "name":"行楷繁"
+    },
+    {
+        "file":"HZKPSHPF",
+        "name":"琥珀繁"
+    },
+    {
+        "file":"HZKPSZYF",
+        "name":"综艺繁"
+    },
+    {
+        "file":"HZKPSXBJ",
+        "name":"报宋简"
+    },
+    {
+        "file":"HZKPSXBF",
+        "name":"报宋繁"
+    },
+    {
+        "file":"HZKPSST.GBK",
+        "name":"宋体GBK"
     }
-}
+]

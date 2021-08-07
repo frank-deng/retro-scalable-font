@@ -3,24 +3,26 @@ import iconv from 'iconv-lite';
 import { FontASC, FontHZK } from './font';
 
 export class FontManager{
+    __hzkFont={};
+    __ascFontList=[];
+    __hzkFontList=[];
     constructor(fontData){
         this.__hzkFont={};
-        for(let fontName in fontData){
-            let item=fontData[fontName];
-            switch(item.type){
-                case 'ascii':
-                    this.__ascFont=new FontASC(item.data,item.fontNames);
-                break;
-                case 'fuhao':
-                    this.__hzkSymbolFont=new FontHZK(item.data);
-                break;
-                default:
-                    this.__hzkFont[fontName]=new FontHZK(item.data,item.name);
-                break;
+        for(let font of fontData){
+            if('ASCPS'==font.file){
+                this.__ascFont=new FontASC(font.data);
+                this.__ascFontList=font.fontNames.slice();
+                continue;
+            }else if('HZKPST'==font.file){
+                this.__hzkSymbolFont=new FontHZK(font.data);
+                continue;
+            }else{
+                this.__hzkFont[font.file]=new FontHZK(font.data);
+                this.__hzkFontList.push({
+                    label:font.name,
+                    value:font.file
+                });
             }
-        }
-        if(!this.__hzkFont[this.__hzkFontName]){
-            this.__hzkFontName=Object.keys(this.__hzkFont)[0];
         }
     }
     __checkFontParam(ascFont,hzkFont){
@@ -32,20 +34,15 @@ export class FontManager{
         }
     }
     getAscFontList(){
-        return this.__ascFont.getFontNames().map((label,value)=>({
+        return this.__ascFontList.map((label,value)=>({
             label,
             value
         }));
     }
     getHzkFontList(){
-        let result=[];
-        for(let fontName in this.__hzkFont){
-            result.push({
-                value:fontName,
-                label:this.__hzkFont[fontName].getFontName()
-            })
-        }
-        return result;
+        return this.__hzkFontList.map(item=>({
+            ...item
+        }));
     }
     getGlyph(char,ascFont=0,hzkFont){
         //参数检测
@@ -81,33 +78,23 @@ export class FontManager{
 }
 
 import axios from 'axios';
-async function loadFont(fileName){
-    let resp=await axios.get(`./public/fonts/${fileName}`,{
-        responseType: 'arraybuffer'
-    });
-    if(200!=resp.status){
-        throw resp;
-    }
-    let result={};
-    result[fileName]=resp.data;
-    return result;
-}
 export async function initFontManager(){
-    let tasks=[], fontInfoNew={};
-    for(let fontName in fontInfo){
-        fontInfoNew[fontName]={
-            ...fontInfo[fontName]
-        }
-        tasks.push(loadFont(fontName));
-    }
-    for(let fontDataLoaded of await Promise.all(tasks)){
+    let fontInfoNew=await Promise.all(fontInfo.map(async(font)=>{
         try{
-            let fontName=Object.keys(fontDataLoaded)[0],
-                fontData=fontDataLoaded[fontName];
-            fontInfoNew[fontName].data=fontData;
+            let resp=await axios.get(`./public/fonts/${font.file}`,{
+                responseType: 'arraybuffer'
+            });
+            return{
+                ...font,
+                data:resp.data
+            };
         }catch(e){
-            console.error(e);
+            if(font.required){
+                throw new Error(`Failed to load required font ${font.name}`,e);
+            }
+            console.warn(`Failed to load font ${font.name}`,e);
         }
-    }
-    return new FontManager(fontInfoNew);
+        return null;
+    }));
+    return new FontManager(fontInfoNew.filter(font=>font));
 }
