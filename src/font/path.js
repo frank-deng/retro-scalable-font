@@ -23,6 +23,7 @@ export class PathElement{
             xStart,
             yStart
         });
+        return this;
     }
     getPos(){
         if(undefined===this.xStart || undefined===this.yStart){
@@ -191,9 +192,10 @@ export class QuadCurveTo extends PathElement{
             this.relative ? x+this.x1 : this.x1,
             this.relative ? y+this.y1 : this.y1
         );
+        return this;
     }
     clone(){
-        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.relative));
+        return (new this.constructor(this.x0,this.y0,this.x1,this.y1,this.relative)).setPos(this.xStart,this.yStart);
     }
     next(){
         return {
@@ -226,7 +228,7 @@ export class CurveTo extends PathElement{
         });
     }
     clone(){
-        return super.__init__(new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative));
+        return (new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative)).setPos(this.xStart,this.yStart);
     }
     setPos(x,y){
         super.setPos(x,y);
@@ -239,6 +241,7 @@ export class CurveTo extends PathElement{
             this.relative ? x+this.x2 : this.x2,
             this.relative ? y+this.y2 : this.y2
         );
+        return this;
     }
     next(){
         return {
