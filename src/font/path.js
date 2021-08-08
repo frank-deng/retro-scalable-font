@@ -1,5 +1,28 @@
-import { Bezier } from 'bezier-js/dist/bezier.js';
-
+function calculateBezierPoint(fraction,...args){
+    let xCalc=[], yCalc=[], xTemp=[], yTemp=[], counter=1000;
+    for(let i=0; i<args.length; i+=2){
+        xCalc.push(args[i]);
+        yCalc.push(args[i+1]);
+    }
+    while(xCalc.length>1 && --counter){
+        let len=xCalc.length-1;
+        for(let i=0; i<len; i++){
+            xTemp.push(xCalc[i]+(xCalc[i+1]-xCalc[i])*fraction);
+            yTemp.push(yCalc[i]+(yCalc[i+1]-yCalc[i])*fraction);
+        }
+        xCalc=xTemp;
+        yCalc=yTemp;
+        xTemp=[];
+        yTemp=[];
+    }
+    if(counter<=0){
+        throw new Error('Dead loop');
+    }
+    return {
+        x:xCalc[0],
+        y:yCalc[0]
+    };
+}
 export class PathElement{
     constructor(){
         if (PathElement==this.constructor) {
@@ -176,22 +199,39 @@ export class LineTo extends PathElement{
     }
 }
 export class QuadCurveTo extends PathElement{
-    __bezierInstance=null;
+    __boundingRect=null;
     constructor(x0,y0,x1,y1,relative=false){
         super();
         Object.assign(this,{
             x0,y0,x1,y1,relative
         });
     }
+    __calculateBoundingRect(){
+        let x=this.xStart,
+            y=this.yStart,
+            x0=this.relative ? x+this.x0 : this.x0,
+            y0=this.relative ? y+this.y0 : this.y0,
+            x1=this.relative ? x+this.x1 : this.x1,
+            y1=this.relative ? y+this.y1 : this.y1,
+            xMin=x, xMax=x, yMin=y, yMax=y;
+        const FRACTION=100;
+        for(let i=0; i<FRACTION; i++){
+            let p=calculateBezierPoint(i/FRACTION,x,y,x0,y0,x1,y1);
+            xMin=Math.min(xMin,p.x);
+            yMin=Math.min(yMin,p.y);
+            xMax=Math.max(xMax,p.x);
+            yMax=Math.max(yMax,p.y);
+        }
+        this.__boundingRect={
+            x0:Math.floor(xMin),
+            y0:Math.floor(yMin),
+            x1:Math.ceil(xMax),
+            y1:Math.ceil(yMax)
+        };
+    }
     setPos(x,y){
         super.setPos(x,y);
-        this.__bezierInstance=new Bezier(
-            x,y,
-            this.relative ? x+this.x0 : this.x0,
-            this.relative ? y+this.y0 : this.y0,
-            this.relative ? x+this.x1 : this.x1,
-            this.relative ? y+this.y1 : this.y1
-        );
+        this.__calculateBoundingRect();
         return this;
     }
     clone(){
@@ -204,15 +244,11 @@ export class QuadCurveTo extends PathElement{
         };
     }
     getBoundingRect(){
-        if(!this.__bezierInstance){
+        if(!this.__boundingRect){
             throw new Error('Start position not set');
         }
-        let bbox=this.__bezierInstance.bbox();
-        return{
-            x0:Math.floor(bbox.x.min),
-            y0:Math.floor(bbox.y.min),
-            x1:Math.ceil(bbox.x.max),
-            y1:Math.ceil(bbox.y.max)
+        return {
+            ...this.__boundingRect
         };
     }
     toSVG(){
@@ -220,7 +256,7 @@ export class QuadCurveTo extends PathElement{
     }
 }
 export class CurveTo extends PathElement{
-    __bezierInstance=null;
+    __boundingRect=null;
     constructor(x0,y0,x1,y1,x2,y2,relative=false){
         super();
         Object.assign(this,{
@@ -230,17 +266,34 @@ export class CurveTo extends PathElement{
     clone(){
         return (new this.constructor(this.x0,this.y0,this.x1,this.y1,this.x2,this.y2,this.relative)).setPos(this.xStart,this.yStart);
     }
+    __calculateBoundingRect(){
+        let x=this.xStart,
+            y=this.yStart,
+            x0=this.relative ? x+this.x0 : this.x0,
+            y0=this.relative ? y+this.y0 : this.y0,
+            x1=this.relative ? x+this.x1 : this.x1,
+            y1=this.relative ? y+this.y1 : this.y1,
+            x2=this.relative ? x+this.x2 : this.x2,
+            y2=this.relative ? y+this.y2 : this.y2,
+            xMin=x, xMax=x, yMin=y, yMax=y;
+        const FRACTION=100;
+        for(let i=0; i<FRACTION; i++){
+            let p=calculateBezierPoint(i/FRACTION,x,y,x0,y0,x1,y1,x2,y2);
+            xMin=Math.min(xMin,p.x);
+            yMin=Math.min(yMin,p.y);
+            xMax=Math.max(xMax,p.x);
+            yMax=Math.max(yMax,p.y);
+        }
+        this.__boundingRect={
+            x0:Math.floor(xMin),
+            y0:Math.floor(yMin),
+            x1:Math.ceil(xMax),
+            y1:Math.ceil(yMax)
+        };
+    }
     setPos(x,y){
         super.setPos(x,y);
-        this.__bezierInstance=new Bezier(
-            x,y,
-            this.relative ? x+this.x0 : this.x0,
-            this.relative ? y+this.y0 : this.y0,
-            this.relative ? x+this.x1 : this.x1,
-            this.relative ? y+this.y1 : this.y1,
-            this.relative ? x+this.x2 : this.x2,
-            this.relative ? y+this.y2 : this.y2
-        );
+        this.__calculateBoundingRect();
         return this;
     }
     next(){
@@ -250,15 +303,11 @@ export class CurveTo extends PathElement{
         };
     }
     getBoundingRect(){
-        if(!this.__bezierInstance){
+        if(!this.__boundingRect){
             throw new Error('Start position not set');
         }
-        let bbox=this.__bezierInstance.bbox();
-        return{
-            x0:Math.floor(bbox.x.min),
-            y0:Math.floor(bbox.y.min),
-            x1:Math.ceil(bbox.x.max),
-            y1:Math.ceil(bbox.y.max)
+        return {
+            ...this.__boundingRect
         };
     }
     toSVG(){
