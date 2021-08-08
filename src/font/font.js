@@ -251,11 +251,13 @@ export class FontASC extends Font{
         super(fontData);
     }
     getGlyph(charIdx,fontIdx=0){
-        //处理英文空格
-        if(0==charIdx){
+        if(charIdx<0x20){
+            return null;
+        }
+        if(0x20==charIdx){
             return new Glyph();
         }
-        return new Glyph(super.getGlyph((charIdx-1)+fontIdx*94));
+        return new Glyph(super.getGlyph((charIdx-0x21)+fontIdx*94));
     }
 }
 export class FontHZK extends Font{

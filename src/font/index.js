@@ -1,4 +1,3 @@
-import fontInfo from './fontInfo.json';
 import iconv from 'iconv-lite';
 import { FontASC, FontHZK, FontGBK } from './font';
 
@@ -9,18 +8,18 @@ export class FontManager{
     constructor(fontData){
         this.__hzkFont={};
         for(let font of fontData){
-            if('ASCPS'==font.file){
+            if('ASCPS'==font.id){
                 this.__ascFont=new FontASC(font.data);
                 this.__ascFontList=font.fontNames.slice();
                 continue;
-            }else if('HZKPST'==font.file){
+            }else if('HZKPST'==font.id){
                 this.__hzkSymbolFont=new FontHZK(font.data,true);
                 continue;
             }else{
-                this.__hzkFont[font.file]=/.GBK$/i.test(font.file) ? new FontGBK(font.data) : new FontHZK(font.data);
+                this.__hzkFont[font.id]=/.GBK$/i.test(font.id) ? new FontGBK(font.data) : new FontHZK(font.data);
                 this.__hzkFontList.push({
                     label:font.name,
-                    value:font.file
+                    value:font.id
                 });
             }
         }
@@ -55,7 +54,7 @@ export class FontManager{
         }
         //作为英文字符处理
         if(code<=0x7e){
-            return this.__ascFont ? this.__ascFont.getGlyph(code-0x20,ascFont) : null;
+            return this.__ascFont ? this.__ascFont.getGlyph(code,ascFont) : null;
         }
         
         //找到当前中文字体
@@ -82,26 +81,4 @@ export class FontManager{
         //汉字字库使用
         return hzkFontInstance.getGlyph(qu,wei);
     }
-}
-
-import axios from 'axios';
-export async function initFontManager(){
-    let fontInfoNew=await Promise.all(fontInfo.map(async(font)=>{
-        try{
-            let resp=await axios.get(`./public/fonts/${font.file}`,{
-                responseType: 'arraybuffer'
-            });
-            return{
-                ...font,
-                data:resp.data
-            };
-        }catch(e){
-            if(font.required){
-                throw new Error(`Failed to load required font ${font.name||font.file}`,e);
-            }
-            console.warn(`Failed to load font ${font.name||font.file}`,e);
-        }
-        return null;
-    }));
-    return new FontManager(fontInfoNew.filter(font=>font));
 }

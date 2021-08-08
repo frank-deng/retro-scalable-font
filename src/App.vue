@@ -4,7 +4,31 @@
 <script setup>
 import {ElLoading,ElMessageBox} from 'element-plus';
 import {provide,reactive} from 'vue';
-import {initFontManager} from '/@/font';
+import axios from 'axios';
+
+import fontInfo from '/@/font/fontInfo.json';
+import {FontManager} from '/@/font';
+
+async function initFontManager(){
+    let fontInfoNew=await Promise.all(fontInfo.map(async(font)=>{
+        try{
+            let resp=await axios.get(`./public/fonts/${font.id}`,{
+                responseType: 'arraybuffer'
+            });
+            return{
+                ...font,
+                data:resp.data
+            };
+        }catch(e){
+            if(font.required){
+                throw new Error(`Failed to load required font ${font.name||font.id}`,e);
+            }
+            console.warn(`Failed to load font ${font.name||font.id}`,e);
+        }
+        return null;
+    }));
+    return new FontManager(fontInfoNew.filter(font=>font));
+}
 
 const store=reactive({
   fontLoading:true

@@ -1,6 +1,6 @@
 [
     {
-        "file":"ASCPS",
+        "id":"ASCPS",
         "required":true,
         "fontNames":[
             "Roman",
@@ -16,127 +16,127 @@
         ]
     },
     {
-        "file":"HZKPST",
+        "id":"HZKPST",
         "required":true
     },
     {
-        "file":"HZKPSSTJ",
+        "id":"HZKPSSTJ",
         "name":"宋体简",
         "required":true
     },
     {
-        "file":"HZKPSFSJ",
+        "id":"HZKPSFSJ",
         "name":"仿宋简",
         "required":true
     },
     {
-        "file":"HZKPSKTJ",
+        "id":"HZKPSKTJ",
         "name":"楷体简",
         "required":true
     },
     {
-        "file":"HZKPSHTJ",
+        "id":"HZKPSHTJ",
         "name":"黑体简",
         "required":true
     },
     {
-        "file":"HZKPSBSJ",
+        "id":"HZKPSBSJ",
         "name":"标宋简"
     },
     {
-        "file":"HZKPSY1J",
+        "id":"HZKPSY1J",
         "name":"细圆简"
     },
     {
-        "file":"HZKPSY3J",
+        "id":"HZKPSY3J",
         "name":"准圆简"
     },
     {
-        "file":"HZKPSLBJ",
+        "id":"HZKPSLBJ",
         "name":"隶变简"
     },
     {
-        "file":"HZKPSDHJ",
+        "id":"HZKPSDHJ",
         "name":"大黑简"
     },
     {
-        "file":"HZKPSWBJ",
+        "id":"HZKPSWBJ",
         "name":"魏碑简"
     },
     {
-        "file":"HZKPSXKJ",
+        "id":"HZKPSXKJ",
         "name":"行楷简"
     },
     {
-        "file":"HZKPSLSJ",
+        "id":"HZKPSLSJ",
         "name":"隶书简"
     },
     {
-        "file":"HZKPSYTJ",
+        "id":"HZKPSYTJ",
         "name":"姚体简"
     },
     {
-        "file":"HZKPSMHJ",
+        "id":"HZKPSMHJ",
         "name":"美黑简"
     },
     {
-        "file":"HZKPSSTF",
+        "id":"HZKPSSTF",
         "name":"宋体繁"
     },
     {
-        "file":"HZKPSFSF",
+        "id":"HZKPSFSF",
         "name":"仿宋繁"
     },
     {
-        "file":"HZKPSKTF",
+        "id":"HZKPSKTF",
         "name":"楷体繁"
     },
     {
-        "file":"HZKPSHTF",
+        "id":"HZKPSHTF",
         "name":"黑体繁"
     },
     {
-        "file":"HZKPSY1F",
+        "id":"HZKPSY1F",
         "name":"细圆繁"
     },
     {
-        "file":"HZKPSY3F",
+        "id":"HZKPSY3F",
         "name":"准圆繁"
     },
     {
-        "file":"HZKPSLBF",
+        "id":"HZKPSLBF",
         "name":"隶变繁"
     },
     {
-        "file":"HZKPSDHF",
+        "id":"HZKPSDHF",
         "name":"大黑繁"
     },
     {
-        "file":"HZKPSWBF",
+        "id":"HZKPSWBF",
         "name":"魏碑繁"
     },
     {
-        "file":"HZKPSXKF",
+        "id":"HZKPSXKF",
         "name":"行楷繁"
     },
     {
-        "file":"HZKPSHPF",
+        "id":"HZKPSHPF",
         "name":"琥珀繁"
     },
     {
-        "file":"HZKPSZYF",
+        "id":"HZKPSZYF",
         "name":"综艺繁"
     },
     {
-        "file":"HZKPSXBJ",
+        "id":"HZKPSXBJ",
         "name":"报宋简"
     },
     {
-        "file":"HZKPSXBF",
+        "id":"HZKPSXBF",
         "name":"报宋繁"
     },
     {
-        "file":"HZKPSST.GBK",
+        "id":"HZKPSST.GBK",
         "name":"宋体GBK"
     }
 ]
