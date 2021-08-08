@@ -264,6 +264,13 @@ export class FontHZK extends Font{
         this.__isSymbol=isSymbol;
     }
     getGlyph(qu,wei){
+        if(wei<0xa1 || wei>0xfe){
+            return null;
+        }
+        if((this.__isSymbol && (qu<0xa1 || qu>0xa9))
+            || (!this.__isSymbol && (qu<0xb0 || qu>0xf7))){
+            return null;
+        }
         return new Glyph(super.getGlyph((this.__isSymbol ? qu-0xa1 : qu-0xb0)*94+(wei-0xa1)),false);
     }
 }
@@ -272,7 +279,10 @@ export class FontGBK extends Font{
         super(fontData);
     }
     getGlyph(qu,wei){
-        let offset=0;
+        let offset=-1;
+        if(qu<0x81 || qu>0xfe || wei<0x40 || wei==0x7f || wei>0xfe){
+            return null;
+        }
         if(wei<0x7f){
             offset=0x2e44+(qu-0x81)*96+(wei-0x40);
         }else if(wei<0xa1){
@@ -281,6 +291,9 @@ export class FontGBK extends Font{
             offset=0x2284+(qu-0x81)*94+(wei-0xa1);
         }else{
             offset=(qu-0xa1)*94+(wei-0xa1);
+        }
+        if(offset<0){
+            return null;
         }
         try{
             return new Glyph(super.getGlyph(offset),false);

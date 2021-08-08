@@ -55,30 +55,29 @@ export class FontManager{
         }
         //作为英文字符处理
         if(code<=0x7e){
-            return this.__ascFont.getGlyph(code-0x20,ascFont);
+            return this.__ascFont ? this.__ascFont.getGlyph(code-0x20,ascFont) : null;
         }
-        //作为中文字符处理
-        let iconvBuf=iconv.encode(char,'GBK');
+        
+        //找到当前中文字体
         let hzkFontInstance=this.__hzkFont[hzkFont];
+        if(!hzkFontInstance){
+            return null;
+        }
 
         //当前字符无法表示为GB2312或GBK
+        let iconvBuf=iconv.encode(char,'GBK');
         if(2!=iconvBuf.length){
             return null;
         }
+        let qu=iconvBuf[0], wei=iconvBuf[1];
         
         //GBK字体使用
         if (hzkFontInstance instanceof FontGBK){
-            return hzkFontInstance.getGlyph(iconvBuf[0],iconvBuf[1]);
-        }
-
-        //当前字符在GBK范围内但不在GB2312范围内
-        let qu=iconvBuf[0], wei=iconvBuf[1];
-        if(qu<0xa1 || (qu>0xa9 && qu<0xb0) || wei<0xa1 || wei>0xfe){
-            return null;
+            return hzkFontInstance.getGlyph(qu,wei);
         }
         //符号字库使用
         if(qu<0xb0){
-            return this.__hzkSymbolFont.getGlyph(qu,wei);
+            return this.__hzkSymbolFont ? this.__hzkSymbolFont.getGlyph(qu,wei) : null;
         }
         //汉字字库使用
         return hzkFontInstance.getGlyph(qu,wei);
