@@ -62,9 +62,7 @@ export class FontBGI{
         }
 
         //Display version info
-        console.info('Font name', this.__fontName);
-        console.info('Driver Version', fontHeader.getUint8(8), fontHeader.getUint8(9));
-        console.info('BGI Revision', fontHeader.getUint8(10), fontHeader.getUint8(11));
+        console.info('Driver Version:', fontHeader.getInt16(8,true), '; BGI Revision', fontHeader.getInt16(10,true));
 
         //Get header info
         let header=new DataView(this.__arrayBuffer.slice(headerSize,headerSize+16));
@@ -74,18 +72,18 @@ export class FontBGI{
         }
         let charCount=this.__charCount=header.getUint16(1,true);
         this.__firstChar=header.getUint8(4);
-        let definitionOffset=header.getUint16(5,true);
+        let strokeOffset=header.getUint16(5,true);
         let scanable=header.getUint8(7);
 
         this.__top=header.getInt8(8);
         this.__baseLine=header.getInt8(9);
         this.__bottom=header.getInt8(10);
-        console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
+        //console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
 
-        let offsetTableOffet=headerSize+16,
-            widthTableOffset=offsetTableOffet+charCount*2;
+        let offsetTableOffset=headerSize+16,
+            widthTableOffset=offsetTableOffset+charCount*2;
         this.__baseOffset=widthTableOffset+charCount;
-        this.__offset=new Uint16Array(this.__arrayBuffer.slice(offsetTableOffet,widthTableOffset));
+        this.__offset=new Uint16Array(this.__arrayBuffer.slice(offsetTableOffset,widthTableOffset));
         this.__width=new Uint8Array(this.__arrayBuffer.slice(widthTableOffset,this.__baseOffset));
     }
     getFontName(){
@@ -115,12 +113,6 @@ export class FontBGI{
             }
             x=processNumber(dx)+1;
             y=baseHeight-processNumber(dy)+this.__bottom;
-            /*
-            if(this.__bottom<this.__top){
-                y=-y;
-            }
-            y-=this.__bottom-this.__top;
-            */
             x*=scale*fontRatio;
             y*=scale;
             switch(oper){
