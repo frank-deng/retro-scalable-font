@@ -1,6 +1,6 @@
 function processNumber(num){
     if(num&0x40){
-        num=-(num&0x3f)-1;
+        num=~((~num)&0x3f);
     }else{
         num&=0x3f;
     }
@@ -63,8 +63,9 @@ export class FontBGI{
         let scanable=header.getUint8(7);
         console.log('scanable',scanable);
 
-        let top=header.getUint8(8), baseLine=header.getUint8(9), bottom=header.getUint8(10);
-        console.log('top,baseline,bottom',top,baseLine,bottom);
+        this.__top=header.getInt8(8);
+        this.__baseLine=header.getInt8(9);
+        this.__bottom=header.getInt8(10);
 
         let offsetTableOffet=headerSize+16,
             widthTableOffset=offsetTableOffet+charCount*2;
@@ -95,10 +96,12 @@ export class FontBGI{
             if(!oper){
                 break;
             }
-            //console.log(oper,processNumber(dx).toString(10),processNumber(dy).toString(10));
-            console.log(oper,dx&0x7f,dy&0x7f);
             x=processNumber(dx);
             y=processNumber(dy);
+            if(this.__bottom<this.__top){
+                y=-y;
+            }
+            y+=this.__top;
             switch(oper){
                 case 1:
                     console.warn('Scan', x,y);

@@ -1,9 +1,9 @@
 <template>
     <el-input-number v-model="state.offset" :min='0'/>
-    {{state.path}}
     <svg width='249' height='249' v-if='state.path'>
         <path :d='state.path' :style="{fill:'none',stroke:'#000',strokeWidth:'1px'}"/>
     </svg>
+    {{state.path}}
 </template>
 <script setup>
 import { computed, reactive } from "vue";
