@@ -1,5 +1,3 @@
-'use strict';
-
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var iconv = require('iconv-lite');
@@ -809,8 +807,8 @@ class FontBGI{
         }
         let charCount=this.__charCount=header.getUint16(1,true);
         this.__firstChar=header.getUint8(4);
-        header.getUint16(5,true);
-        header.getUint8(7);
+        let strokeOffset=header.getUint16(5,true);
+        let scanable=header.getUint8(7);
 
         this.__top=header.getInt8(8);
         this.__baseLine=header.getInt8(9);

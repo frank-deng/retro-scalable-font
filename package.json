@@ -4,7 +4,7 @@
   "main":"ucfontlib.js",
   "scripts": {
     "dev": "vite",
-    "build": "rollup -f cjs -o fontlib.js ./src/font/index.js"
+    "build": "rollup -f cjs --no-treeshake --no-strict -o fontlib.js ./src/font/index.js"
   },
   "dependencies": {
     "axios": "^0.21.1",
