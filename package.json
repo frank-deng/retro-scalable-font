@@ -1,7 +1,7 @@
 {
   "name": "ucdos-outline-font-svg",
   "version": "0.0.0",
-  "main":"ucfontlib.js",
+  "main":"fontlib.js",
   "scripts": {
     "dev": "vite",
     "build": "rollup -f cjs --no-treeshake --no-strict -o fontlib.js ./src/font/index.js"
