@@ -15,7 +15,7 @@ export class FontManager{
                 let fontName=bgiFont.getFontName();
                 this.__bgiFont[fontName]=bgiFont;
                 this.__ascFontList.push({
-                    label:font.name||fontName,
+                    label:fontName+' (BGI)',
                     value:fontName
                 });
             }else if('ASCPS'==font.id){
