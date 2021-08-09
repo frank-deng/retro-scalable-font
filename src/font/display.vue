@@ -14,7 +14,8 @@
                 :key='char.id'
                 :fill-rule='char.fillRule'
                 :d='char.path'
-                :transform='char.transform'/>
+                :transform='char.transform'
+                :style="char.style"/>
         </g>
     </svg>
 </template>
@@ -22,6 +23,7 @@
 import { inject, computed, defineProps, reactive } from 'vue';
 import linefold from 'linefold';
 import {Glyph} from './font';
+import {GlyphBGI} from './fontbgi';
 const store=inject('store');
 const props=defineProps({
     maxWidth:{
@@ -34,7 +36,7 @@ const props=defineProps({
         default:24
     },
     ascFont:{
-        type:Number,
+        type:[Number,String],
         default:0
     },
     hzkFont:{
@@ -102,7 +104,12 @@ const state=reactive({
     })
 });
 const getGlyph=(char,ascFont,hzkFont)=>{
-    return store.fontManager.getGlyph(char,ascFont,hzkFont);
+    try{
+        return store.fontManager.getGlyph(char,ascFont,hzkFont);
+    }catch(e){
+        console.error(e);
+    }
+    return 0;
 }
 const measureText=(text,fontSize,ascFont,hzkFont,charSpacing=0)=>{
     let x=0;
@@ -143,8 +150,15 @@ const renderText=(text,x=0,y=0)=>{
         if(!glyph.isEmpty()){
             let charScale=scale,
                 translateY=y,
-                fillRule='nonzero';
-            if(glyph.isAscii()){
+                fillRule='nonzero',
+                style={};
+            if(glyph instanceof GlyphBGI){
+                style={
+                    fill:'none',
+                    stroke:props.color,
+                    strokeWidth:'1px'
+                };
+            }else if(glyph.isAscii()){
                 charScale=scale*1.2;
                 fillRule='evenodd';
                 translateY+=10*scale;
@@ -153,7 +167,8 @@ const renderText=(text,x=0,y=0)=>{
                 id:Math.random(),
                 fillRule,
                 path:glyph.toSVG(),
-                transform:`translate(${xPos},${translateY}) scale(${charScale})`
+                transform:`translate(${xPos},${translateY}) scale(${charScale})`,
+                style
             });
         }
         xPos+=glyph.getWidth()*scale+(props.charSpacing||0);
@@ -161,3 +176,12 @@ const renderText=(text,x=0,y=0)=>{
     return result;
 }
 </script>
+<style lang="less" scoped>
+svg{
+    path{
+        stroke-linecap:round;
+        stroke-linejoin:round;
+        vector-effect:non-scaling-stroke;
+    }
+}
+</style>

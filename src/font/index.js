@@ -1,16 +1,29 @@
 import iconv from 'iconv-lite';
-import { FontASC, FontHZK, FontGBK } from './font';
+import { FontASC, FontHZK, FontGBK, Glyph } from './font';
+import { FontBGI } from './fontbgi';
 
 export class FontManager{
-    __hzkFont={};
+    __bgiFont={};
     __ascFontList=[];
+    __hzkFont={};
     __hzkFontList=[];
     constructor(fontData){
         this.__hzkFont={};
         for(let font of fontData){
-            if('ASCPS'==font.id){
+            if(/.CHR$/i.test(font.id)){
+                let bgiFont=new FontBGI(font.data);
+                let fontName=bgiFont.getFontName();
+                this.__bgiFont[fontName]=bgiFont;
+                this.__ascFontList.push({
+                    label:font.name||fontName,
+                    value:fontName
+                });
+            }else if('ASCPS'==font.id){
                 this.__ascFont=new FontASC(font.data);
-                this.__ascFontList=font.fontNames.slice();
+                this.__ascFontList=this.__ascFontList.concat(font.fontNames.map((label,value)=>({
+                    label,
+                    value
+                })));
                 continue;
             }else if('HZKPST'==font.id){
                 this.__hzkSymbolFont=new FontHZK(font.data,true);
@@ -25,17 +38,16 @@ export class FontManager{
         }
     }
     __checkFontParam(ascFont,hzkFont){
-        if(isNaN(ascFont) || null===ascFont || ascFont<0 || ascFont>9){
-            throw new ValueError('西文字体必须为0-9的数字');
+        if(!this.__bgiFont[ascFont] && (isNaN(ascFont) || null===ascFont || ascFont<0 || ascFont>9)){
+            throw new ReferenceError('西文字体必须为0-9的数字，或指定的BGI字体名称');
         }
         if(!this.__hzkFont[hzkFont]){
-            throw new ValueError('指定的中文字体不存在');
+            throw new ReferenceError('指定的中文字体不存在');
         }
     }
     getAscFontList(){
-        return this.__ascFontList.map((label,value)=>({
-            label,
-            value
+        return this.__ascFontList.map(item=>({
+            ...item
         }));
     }
     getHzkFontList(){
@@ -54,6 +66,9 @@ export class FontManager{
         }
         //作为英文字符处理
         if(code<=0x7e){
+            if(this.__bgiFont[ascFont]){
+                return this.__bgiFont[ascFont].getGlyph(code,Glyph.BASE_HEIGHT-4);
+            }
             return this.__ascFont ? this.__ascFont.getGlyph(code,ascFont) : null;
         }
         

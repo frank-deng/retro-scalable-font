@@ -62,6 +62,7 @@ export class FontBGI{
         }
 
         //Display version info
+        console.info('Font name', this.__fontName);
         console.info('Driver Version', fontHeader.getUint8(8), fontHeader.getUint8(9));
         console.info('BGI Revision', fontHeader.getUint8(10), fontHeader.getUint8(11));
 
@@ -79,7 +80,7 @@ export class FontBGI{
         this.__top=header.getInt8(8);
         this.__baseLine=header.getInt8(9);
         this.__bottom=header.getInt8(10);
-        //console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
+        console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
 
         let offsetTableOffet=headerSize+16,
             widthTableOffset=offsetTableOffet+charCount*2;
@@ -112,12 +113,14 @@ export class FontBGI{
             if(!oper){
                 break;
             }
-            x=processNumber(dx);
-            y=processNumber(dy);
+            x=processNumber(dx)+1;
+            y=baseHeight-processNumber(dy)+this.__bottom;
+            /*
             if(this.__bottom<this.__top){
                 y=-y;
             }
-            y+=this.__top+this.__bottom;
+            y-=this.__bottom-this.__top;
+            */
             x*=scale*fontRatio;
             y*=scale;
             switch(oper){

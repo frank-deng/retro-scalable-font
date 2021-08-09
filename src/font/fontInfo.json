@@ -138,5 +138,35 @@
     {
         "id":"HZKPSST.GBK",
         "name":"宋体GBK"
+    },
+    {
+        "id":"BOLD.CHR"
+    },
+    {
+        "id":"GOTH.CHR"
+    },
+    {
+        "id":"LITT.CHR"
+    },
+    {
+        "id":"SCRI.CHR"
+    },
+    {
+        "id":"TRIP.CHR"
+    },
+    {
+        "id":"EURO.CHR"
+    },
+    {
+        "id":"LCOM.CHR"
+    },
+    {
+        "id":"SANS.CHR"
+    },
+    {
+        "id":"SIMP.CHR"
+    },
+    {
+        "id":"TSCR.CHR"
     }
 ]

@@ -43,7 +43,7 @@ const state=reactive({
     })
 });
 
-axios.get(`./public/bgifonts/BOLD.CHR`,{
+axios.get(`./public/fonts/BOLD.CHR`,{
     responseType: 'arraybuffer'
 }).then((resp)=>{
     state.testFont=new FontBGI(resp.data);
