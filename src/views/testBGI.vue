@@ -1,9 +1,8 @@
 <template>
     <el-input-number v-model="state.offset" :min='0'/>
-    <svg width='249' height='249' v-if='state.path'>
+    <svg v-if='state.glyph' :width='state.width' :height='state.height'>
         <path :d='state.path' :style="{fill:'none',stroke:'#000',strokeWidth:'1px'}"/>
     </svg>
-    {{state.path}}
 </template>
 <script setup>
 import { computed, reactive } from "vue";
@@ -11,25 +10,40 @@ import axios from 'axios';
 import {FontBGI} from '/@/font/fontbgi.js';
 
 const state=reactive({
-    offset:0,
+    offset:33,
     testFont:null,
-    path:computed(()=>{
+    glyph:computed(()=>{
         if(!state.testFont){
             return null;
         }
         try{
-            let glyph=state.testFont.getGlyph(state.offset);
-            if(glyph){
-                return glyph.toSVG();
-            }
+            return state.testFont.getGlyph(state.offset,3);
         }catch(e){
             console.error(e);
         }
         return null;
+    }),
+    path:computed(()=>{
+        if(!state.glyph){
+            return null;
+        }
+        return state.glyph.toSVG();
+    }),
+    width:computed(()=>{
+        if(!state.glyph){
+            return 0;
+        }
+        return state.glyph.getWidth();
+    }),
+    height:computed(()=>{
+        if(!state.glyph){
+            return 0;
+        }
+        return state.glyph.getHeight();
     })
 });
 
-axios.get(`./public/bgifonts/SANS.CHR`,{
+axios.get(`./public/bgifonts/BOLD.CHR`,{
     responseType: 'arraybuffer'
 }).then((resp)=>{
     state.testFont=new FontBGI(resp.data);

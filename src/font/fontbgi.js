@@ -9,8 +9,25 @@ function processNumber(num){
 
 import { MoveTo,LineTo,Path } from "./path";
 export class GlyphBGI extends Path{
-    constructor(param){
+    __width=0;
+    __height=0;
+    constructor(param,font){
         super(param);
+        super.setClosedPath(false);
+    }
+    setWidth(value){
+        this.__width=value;
+        return this;
+    }
+    getWidth(){
+        return this.__width;
+    }
+    setHeight(value){
+        this.__height=value;
+        return this;
+    }
+    getHeight(){
+        return this.__height;
     }
 }
 export class FontBGI{
@@ -66,6 +83,7 @@ export class FontBGI{
         this.__top=header.getInt8(8);
         this.__baseLine=header.getInt8(9);
         this.__bottom=header.getInt8(10);
+        console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
 
         let offsetTableOffet=headerSize+16,
             widthTableOffset=offsetTableOffet+charCount*2;
@@ -76,12 +94,13 @@ export class FontBGI{
     getFontName(){
         return this.__fontName;
     }
-    getGlyph(idx){
-        if(idx<this.__firstChar || idx>(this.__firstChar+this.__charCount)){
+    getGlyph(idx,scale=1){
+        if(idx<this.__firstChar || idx>=(this.__firstChar+this.__charCount)){
             return null;
         }
-        let offset=this.__baseOffset+this.__offset[idx-this.__firstChar], counter=100000, path=new Path();
-        path.setClosedPath(false);
+        idx-=this.__firstChar;
+        let offset=this.__baseOffset+this.__offset[idx], counter=100000, path=new GlyphBGI();
+        path.setWidth(this.__width[idx]*scale).setHeight(Math.abs(this.__bottom-this.__top)*scale);
         let x=0, y=0;
         while(counter--){
             let dx=this.__dataView.getUint8(offset);offset++;
@@ -102,6 +121,8 @@ export class FontBGI{
                 y=-y;
             }
             y+=this.__top;
+            x*=scale;
+            y*=scale;
             switch(oper){
                 case 1:
                     console.warn('Scan', x,y);
@@ -117,7 +138,6 @@ export class FontBGI{
         if(counter<=0){
             console.error('死循环');
         }
-        console.log(path);
         return path;
     }
 }
