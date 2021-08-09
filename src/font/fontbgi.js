@@ -72,18 +72,14 @@ export class FontBGI{
             throw new ReferenceError(`Error reading font file: expected 0x2b, got 0x${signature.toString(16)}`);
         }
         let charCount=this.__charCount=header.getUint16(1,true);
-        console.log('charCount',charCount);
         this.__firstChar=header.getUint8(4);
-        console.log('firstChar',this.__firstChar);
         let definitionOffset=header.getUint16(5,true);
-        console.log('definitionOffset',definitionOffset);
         let scanable=header.getUint8(7);
-        console.log('scanable',scanable);
 
         this.__top=header.getInt8(8);
         this.__baseLine=header.getInt8(9);
         this.__bottom=header.getInt8(10);
-        console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
+        //console.log('top,base,bottom',this.__top,this.__baseLine,this.__bottom);
 
         let offsetTableOffet=headerSize+16,
             widthTableOffset=offsetTableOffet+charCount*2;
@@ -94,14 +90,15 @@ export class FontBGI{
     getFontName(){
         return this.__fontName;
     }
-    getGlyph(idx,scale=1){
+    getGlyph(idx,fontSize=16,fontRatio=1){
         if(idx<this.__firstChar || idx>=(this.__firstChar+this.__charCount)){
             return null;
         }
         idx-=this.__firstChar;
         let offset=this.__baseOffset+this.__offset[idx], counter=100000, path=new GlyphBGI();
-        path.setWidth(this.__width[idx]*scale).setHeight(Math.abs(this.__bottom-this.__top)*scale);
-        let x=0, y=0;
+        let baseHeight=Math.abs(this.__bottom-this.__top);
+        let x=0, y=0, scale=fontSize/baseHeight;
+        path.setWidth(this.__width[idx]*scale*fontRatio).setHeight(baseHeight*scale);
         while(counter--){
             let dx=this.__dataView.getUint8(offset);offset++;
             let dy=this.__dataView.getUint8(offset);offset++;
@@ -120,8 +117,8 @@ export class FontBGI{
             if(this.__bottom<this.__top){
                 y=-y;
             }
-            y+=this.__top;
-            x*=scale;
+            y+=this.__top+this.__bottom;
+            x*=scale*fontRatio;
             y*=scale;
             switch(oper){
                 case 1:

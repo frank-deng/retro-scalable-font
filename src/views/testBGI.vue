@@ -1,7 +1,7 @@
 <template>
     <el-input-number v-model="state.offset" :min='0'/>
     <svg v-if='state.glyph' :width='state.width' :height='state.height'>
-        <path :d='state.path' :style="{fill:'none',stroke:'#000',strokeWidth:'1px'}"/>
+        <path :d='state.path'/>
     </svg>
 </template>
 <script setup>
@@ -17,7 +17,7 @@ const state=reactive({
             return null;
         }
         try{
-            return state.testFont.getGlyph(state.offset,3);
+            return state.testFont.getGlyph(state.offset,255,2);
         }catch(e){
             console.error(e);
         }
@@ -56,5 +56,12 @@ svg{
     display:block;
     margin-top:10px;
     border:1px solid #666666;
+    path{
+        fill:none;
+        stroke:#000;
+        stroke-width:1px;
+        stroke-linecap:round;
+        stroke-linejoin:round;
+    }
 }
 </style>
