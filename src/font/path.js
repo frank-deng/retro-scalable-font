@@ -317,6 +317,7 @@ export class CurveTo extends PathElement{
 
 export class Path{
     __strokeList=[];
+    __closedPath=true;
     __x=0;
     __y=0;
     __bbox={
@@ -409,12 +410,21 @@ export class Path{
         };
     }
     isEmpty(){
-        return !this.__strokeList.length;
+        for(let item of this.__strokeList){
+            if(item instanceof MoveTo){
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+    setClosedPath(val=true){
+        this.__closedPath=!!val;
     }
     toSVG(){
         if(this.isEmpty()){
             return null;
         }
-        return this.__strokeList.map(item=>item.toSVG()).join(' ')+' Z';
+        return this.__strokeList.map(item=>item.toSVG()).join(' ')+(this.__closedPath ? ' Z' : '');
     }
 }

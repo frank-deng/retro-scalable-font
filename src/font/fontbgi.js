@@ -1,3 +1,18 @@
+function processNumber(num){
+    if(num&0x40){
+        num=-(num&0x3f)-1;
+    }else{
+        num&=0x3f;
+    }
+    return num;
+}
+
+import { MoveTo,LineTo,Path } from "./path";
+export class GlyphBGI extends Path{
+    constructor(param){
+        super(param);
+    }
+}
 export class FontBGI{
     __cache={};
     constructor(fontData){
@@ -64,18 +79,42 @@ export class FontBGI{
         if(idx<this.__firstChar || idx>(this.__firstChar+this.__charCount)){
             return null;
         }
-        idx-=this.__firstChar;
-        let offset=this.__baseOffset+this.__offset[idx], counter=100000, result=[];
+        let offset=this.__baseOffset+this.__offset[idx-this.__firstChar], counter=100000, path=new Path();
+        path.setClosedPath(false);
+        let x=0, y=0;
         while(counter--){
-            let value=this.__dataView.getUint8(offset);offset++;
-            if(!value){
+            let dx=this.__dataView.getUint8(offset);offset++;
+            let dy=this.__dataView.getUint8(offset);offset++;
+            let oper=0;
+            if(dx&0x80){
+                oper|=2;
+            }
+            if(dy&0x80){
+                oper|=1;
+            }
+            if(!oper){
                 break;
             }
-            result.push(value);
+            //console.log(oper,processNumber(dx).toString(10),processNumber(dy).toString(10));
+            console.log(oper,dx&0x7f,dy&0x7f);
+            x=processNumber(dx);
+            y=processNumber(dy);
+            switch(oper){
+                case 1:
+                    console.warn('Scan', x,y);
+                break;
+                case 2:
+                    path.add(new MoveTo(x,y));
+                break;
+                case 3:
+                    path.add(new LineTo(x,y));
+                break;
+            }
         }
         if(counter<=0){
             console.error('死循环');
         }
-        console.log('字符数据',result);
+        console.log(path);
+        return path;
     }
 }
