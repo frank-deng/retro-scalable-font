@@ -41,7 +41,8 @@
         </el-form-item>
         <el-form-item label-width="">
             <el-button @click='resetParam'>复位</el-button>
-            <el-button type='primary' @click='saveSVG'>保存SVG</el-button>
+            <el-button type='primary' @click='saveSVG'
+                :disabled='!state.inputText'>保存SVG</el-button>
         </el-form-item>
         <div class='displayTextContainer'>
             <displayText
