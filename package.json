@@ -1,7 +1,7 @@
 {
   "name": "ucdos-outline-font-svg",
   "version": "0.0.0",
-  "main":"fontlib.js",
+  "main": "fontlib.js",
   "scripts": {
     "dev": "vite",
     "build": "rollup -f cjs --no-treeshake --no-strict -o fontlib.js ./src/font/index.js"
@@ -11,7 +11,7 @@
     "element-plus": "^1.0.2-beta.69",
     "file-saver": "^2.0.5",
     "iconv-lite": "^0.6.3",
-    "linefold": "^1.0.7",
+    "linefold": "^1.0.8",
     "vue": "^3.0.4",
     "vue-router": "^4.0.10"
   },
