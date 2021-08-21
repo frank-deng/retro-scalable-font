@@ -6,13 +6,13 @@ import {ElLoading,ElMessageBox} from 'element-plus';
 import {provide,reactive} from 'vue';
 import axios from 'axios';
 
-import fontInfo from '/@/font/fontInfo.json';
-import {FontManager} from '/@/font';
+import fontInfo from '@/font/fontInfo.json';
+import {FontManager} from '@/font';
 
 async function initFontManager(){
     let fontInfoNew=await Promise.all(fontInfo.map(async(font)=>{
         try{
-            let resp=await axios.get(`./public/fonts/${font.id}`,{
+            let resp=await axios.get(`./fonts/${font.id}`,{
                 responseType: 'arraybuffer'
             });
             return{

@@ -64,7 +64,7 @@
 <script setup>
 const LOCAL_STORAGE_KEY='UCDOS_OUTLINE_FONT_SVG_PARAMS';
 import {inject, ref, reactive, watch} from 'vue';
-import displayText from '/@/font/display.vue';
+import displayText from '@/font/display.vue';
 import {saveAs} from 'file-saver';
 const store=inject('store');
 

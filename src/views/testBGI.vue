@@ -7,7 +7,7 @@
 <script setup>
 import { computed, reactive } from "vue";
 import axios from 'axios';
-import {FontBGI} from '/@/font/fontbgi.js';
+import {FontBGI} from '@/font/fontbgi.js';
 
 const state=reactive({
     offset:33,
@@ -43,7 +43,7 @@ const state=reactive({
     })
 });
 
-axios.get(`./public/fonts/BOLD.CHR`,{
+axios.get(`./fonts/BOLD.CHR`,{
     responseType: 'arraybuffer'
 }).then((resp)=>{
     state.testFont=new FontBGI(resp.data);

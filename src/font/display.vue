@@ -20,7 +20,7 @@
     </svg>
 </template>
 <script setup>
-import { inject, computed, defineProps, reactive } from 'vue';
+import { inject, computed, reactive } from 'vue';
 import linefold from 'linefold';
 import {Glyph} from './font';
 import {GlyphBGI} from './fontbgi';

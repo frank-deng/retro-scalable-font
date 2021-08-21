@@ -10,7 +10,7 @@
 <script setup>
 import { computed, reactive } from "vue";
 import axios from 'axios';
-import {Font} from '/@/font/font.js';
+import {Font} from '@/font/font.js';
 
 const state=reactive({
     offset:0,
@@ -45,7 +45,7 @@ class TestFont extends Font{
     }
 }
 
-axios.get(`./public/fonts/HZKPSST.GBK`,{
+axios.get(`./fonts/HZKPSST.GBK`,{
     responseType: 'arraybuffer'
 }).then((resp)=>{
     state.testFont=new TestFont(resp.data);
