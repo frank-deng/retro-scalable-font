@@ -32,7 +32,7 @@ export class GlyphBGI extends Path{
 }
 export class FontBGI{
     __cache={};
-    constructor(fontData){
+    constructor(fontData, _fontName){
         this.__arrayBuffer=fontData;
         this.__dataView=new DataView(this.__arrayBuffer);
 
@@ -54,7 +54,7 @@ export class FontBGI{
             console.warn(`Incorrect header size: expected 0x80, got 0x${headerSize.toString(16)}`);
         }
 
-        this.__fontName=new TextDecoder().decode(new Uint8Array(fontHeader.buffer.slice(2,6)));
+        this.__fontName=_fontName || new TextDecoder().decode(new Uint8Array(fontHeader.buffer.slice(2,6)));
 
         let fontSize=fontHeader.getUint16(6,true);
         if(fontSize!=this.__arrayBuffer.byteLength-0x80){

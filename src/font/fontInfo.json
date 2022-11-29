@@ -140,33 +140,43 @@
         "name":"宋体GBK"
     },
     {
-        "id":"BOLD.CHR"
+        "id":"BOLD.CHR",
+        "name":"Bold Font"
     },
     {
-        "id":"GOTH.CHR"
+        "id":"GOTH.CHR",
+        "name":"Gothic Font"
     },
     {
-        "id":"LITT.CHR"
+        "id":"LITT.CHR",
+        "name":"Small Font"
     },
     {
-        "id":"SCRI.CHR"
+        "id":"SCRI.CHR",
+        "name":"Script Font"
     },
     {
-        "id":"TRIP.CHR"
+        "id":"TRIP.CHR",
+        "name":"Triplex Font"
     },
     {
-        "id":"EURO.CHR"
+        "id":"EURO.CHR",
+        "name":"European Font"
     },
     {
-        "id":"LCOM.CHR"
+        "id":"LCOM.CHR",
+        "name":"Complex Font"
     },
     {
-        "id":"SANS.CHR"
+        "id":"SANS.CHR",
+        "name":"Sans Serif Font"
     },
     {
-        "id":"SIMP.CHR"
+        "id":"SIMP.CHR",
+        "name":"Simplex Font"
     },
     {
-        "id":"TSCR.CHR"
+        "id":"TSCR.CHR",
+        "name":"Triplex Script Font"
     }
 ]

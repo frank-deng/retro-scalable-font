@@ -11,7 +11,7 @@ export class FontManager{
         this.__hzkFont={};
         for(let font of fontData){
             if(/.CHR$/i.test(font.id)){
-                let bgiFont=new FontBGI(font.data);
+                let bgiFont=new FontBGI(font.data, font.name);
                 let fontName=bgiFont.getFontName();
                 this.__bgiFont[fontName]=bgiFont;
                 this.__ascFontList.push({
